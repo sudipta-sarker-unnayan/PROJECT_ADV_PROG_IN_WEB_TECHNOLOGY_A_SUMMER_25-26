@@ -1,0 +1,23 @@
+import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { DatabaseModule } from './database/database.module';
+import { RolesModule } from './roles/roles.module';
+import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
+import { DepartmentsModule } from './departments/departments.module';
+import { EmployeesModule } from './employees/employees.module';
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    DatabaseModule,
+    RolesModule,
+    UsersModule,
+    AuthModule,
+    DepartmentsModule,
+    EmployeesModule,
+    //  ClientsModule, ProjectsModule, AttendanceModule,
+    // LeaveModule, DashboardModule -- added as each is built (see timeline)
+  ],
+})
+export class AppModule {}
