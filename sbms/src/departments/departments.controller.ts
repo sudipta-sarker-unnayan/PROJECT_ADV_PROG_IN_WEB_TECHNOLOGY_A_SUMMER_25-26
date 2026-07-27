@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { DepartmentsService } from './departments.service';
@@ -16,6 +17,7 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RoleName } from '../roles/entities/role.entity';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(RoleName.SUPER_ADMIN)
@@ -28,10 +30,10 @@ export class DepartmentsController {
     return this.departmentsService.create(dto);
   }
 
-  @Get()
-  findAll() {
-    return this.departmentsService.findAll();
-  }
+ @Get()
+findAll(@Query() query: PaginationQueryDto) {
+  return this.departmentsService.findAll(query);
+}
 
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {

@@ -7,10 +7,16 @@ import { AuthModule } from './auth/auth.module';
 import { DepartmentsModule } from './departments/departments.module';
 import { EmployeesModule } from './employees/employees.module';
 import { ClientsModule } from './clients/clients.module';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    CacheModule.register({
+  isGlobal: true,
+  ttl: 60 * 1000,
+  max: 100,
+}),
     DatabaseModule,
     RolesModule,
     UsersModule,

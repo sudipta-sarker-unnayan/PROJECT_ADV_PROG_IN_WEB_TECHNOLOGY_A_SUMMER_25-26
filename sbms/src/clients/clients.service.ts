@@ -2,18 +2,21 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { Client } from './entities/client.entity';
 import { User } from '../users/entities/user.entity';
 import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
 import { RoleName } from '../roles/entities/role.entity';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 
 @Injectable()
 export class ClientsService {
+  private readonly logger = new Logger(ClientsService.name);
   constructor(
     @InjectRepository(Client) private readonly clientsRepo: Repository<Client>,
     @InjectRepository(User) private readonly usersRepo: Repository<User>,
@@ -37,8 +40,35 @@ export class ClientsService {
     return this.clientsRepo.save(client);
   }
 
-  findAll(): Promise<Client[]> {
-    return this.clientsRepo.find();
+  async findAll(query: PaginationQueryDto) {
+    const {
+      page = 1,
+      limit = 10,
+      sortBy = 'id',
+      sortOrder = 'ASC',
+      search,
+    } = query;
+
+    const [data, total] = await this.clientsRepo.findAndCount({
+      where: search
+        ? {
+            companyName: ILike(`%${search}%`),
+          }
+        : {},
+      order: {
+        [sortBy]: sortOrder,
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   async findOne(id: number): Promise<Client> {
