@@ -7,6 +7,9 @@ import { AuthModule } from './auth/auth.module';
 import { DepartmentsModule } from './departments/departments.module';
 import { EmployeesModule } from './employees/employees.module';
 import { ClientsModule } from './clients/clients.module';
+import { AttendenceModule } from './attendence/attendence.module';
+import { LeaveModule } from './leave/leave.module';
+import { TaskModule } from './task/task.module';
 
 @Module({
   imports: [
@@ -18,6 +21,10 @@ import { ClientsModule } from './clients/clients.module';
     DepartmentsModule,
     EmployeesModule,
     ClientsModule,
+    AttendenceModule,
+    LeaveModule,
+    TaskModule,
+    
     //   ProjectsModule, AttendanceModule,
     // LeaveModule, DashboardModule 
   ],
