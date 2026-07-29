@@ -4,11 +4,13 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
 import { Role } from '../../roles/entities/role.entity';
+import { Manager } from 'src/managers/entities/manager.entity';
 
 export enum UserStatus {
   ACTIVE = 'active',
@@ -42,4 +44,7 @@ export class User {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+
+  @OneToOne(() => Manager, (manager) => manager.user)
+  manager: Manager;
 }

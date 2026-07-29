@@ -1,4 +1,5 @@
 import { Employee } from "src/employees/entities/employee.entity";
+import { Manager } from "src/managers/entities/manager.entity";
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 export enum LeaveStatus {
@@ -37,6 +38,13 @@ export class Leave {
     @ManyToOne(() => Employee, (employee) => employee.leaves, {
         onDelete: 'CASCADE',
     })
-    @JoinColumn({name:'employeeId'})
+    @JoinColumn({ name: 'employeeId' })
     employee: Employee;
+
+    @ManyToOne(() => Manager, (manager) => manager.leaves, {
+        nullable: true,
+    })
+    @JoinColumn({ name: 'managerId' })
+    manager: Manager;
+
 }

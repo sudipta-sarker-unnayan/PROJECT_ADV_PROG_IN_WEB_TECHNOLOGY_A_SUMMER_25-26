@@ -1,4 +1,5 @@
 import { Employee } from 'src/employees/entities/employee.entity';
+import { Manager } from 'src/managers/entities/manager.entity';
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 export enum TaskPriority {
@@ -64,4 +65,11 @@ export class Task {
   })
   @JoinColumn({ name: 'employeeId' })
   employee: Employee;
+
+  @ManyToOne(() => Manager, (manager) => manager.tasks, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'managerId' })
+  manager: Manager;
+
 }

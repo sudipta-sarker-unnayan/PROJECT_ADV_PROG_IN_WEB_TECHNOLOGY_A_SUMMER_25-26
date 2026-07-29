@@ -10,6 +10,7 @@ import { ClientsModule } from './clients/clients.module';
 import { AttendenceModule } from './attendence/attendence.module';
 import { LeaveModule } from './leave/leave.module';
 import { TaskModule } from './task/task.module';
+import { ManagersModule } from './managers/managers.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { TaskModule } from './task/task.module';
     AttendenceModule,
     LeaveModule,
     TaskModule,
+    ManagersModule,
     
     //   ProjectsModule, AttendanceModule,
     // LeaveModule, DashboardModule 

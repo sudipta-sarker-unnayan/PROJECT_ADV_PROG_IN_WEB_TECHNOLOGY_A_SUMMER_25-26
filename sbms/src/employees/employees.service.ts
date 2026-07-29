@@ -12,6 +12,7 @@ import { Department } from '../departments/entities/department.entity';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { RoleName } from '../roles/entities/role.entity';
+import { Manager } from 'src/managers/entities/manager.entity';
 
 @Injectable()
 export class EmployeesService {
@@ -19,7 +20,8 @@ export class EmployeesService {
     @InjectRepository(Employee) private readonly employeesRepo: Repository<Employee>,
     @InjectRepository(User) private readonly usersRepo: Repository<User>,
     @InjectRepository(Department) private readonly departmentsRepo: Repository<Department>,
-  ) {}
+    @InjectRepository(Manager) private readonly managerRepo: Repository<Manager>,
+  ) { }
 
   async create(dto: CreateEmployeeDto): Promise<Employee> {
     const user = await this.usersRepo.findOne({ where: { id: dto.userId } });
@@ -37,7 +39,7 @@ export class EmployeesService {
       employee.department = await this.findDepartmentOrFail(dto.departmentId);
     }
     if (dto.managerId) {
-      employee.manager = await this.findEmployeeOrFail(dto.managerId);
+      employee.manager = await this.findManagerOrFail(dto.managerId);
     }
 
     return this.employeesRepo.save(employee);
@@ -61,7 +63,7 @@ export class EmployeesService {
       if (dto.managerId === id) {
         throw new BadRequestException('An employee cannot be their own manager');
       }
-      employee.manager = await this.findEmployeeOrFail(dto.managerId);
+      employee.manager = await this.findManagerOrFail(dto.managerId);
     }
 
     Object.assign(employee, {
@@ -87,5 +89,17 @@ export class EmployeesService {
     const department = await this.departmentsRepo.findOne({ where: { id } });
     if (!department) throw new NotFoundException(`Department #${id} not found`);
     return department;
+  }
+
+  private async findManagerOrFail(id: number): Promise<Manager> {
+    const manager = await this.managerRepo.findOne({
+      where: { id },
+    });
+
+    if (!manager) {
+      throw new NotFoundException(`Manager #${id} not found`);
+    }
+
+    return manager;
   }
 }

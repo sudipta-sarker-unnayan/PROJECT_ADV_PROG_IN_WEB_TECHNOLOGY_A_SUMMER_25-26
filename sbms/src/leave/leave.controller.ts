@@ -1,8 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { LeaveService } from './leave.service';
 import { CreateLeaveDto } from './dto/create-leave.dto';
 import { UpdateStatusDto } from './dto/update-status.dto';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/common/guards/roles.guard';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { RoleName } from 'src/roles/entities/role.entity';
 
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(RoleName.SUPER_ADMIN,RoleName.MANAGER)
 @Controller('leave')
 export class LeaveController {
   constructor(private readonly leaveService: LeaveService) {}

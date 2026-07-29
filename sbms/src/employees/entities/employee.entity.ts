@@ -4,6 +4,7 @@ import { Department } from '../../departments/entities/department.entity';
 import { Attendence } from 'src/attendence/entities/attendence.entity';
 import { Leave } from 'src/leave/entities/leave.entity';
 import { Task } from 'src/task/entities/task.entity';
+import { Manager } from 'src/managers/entities/manager.entity';
 
 @Entity('employees')
 export class Employee {
@@ -21,9 +22,6 @@ export class Employee {
   @JoinColumn({ name: 'department_id' })
   department: Department;
 
-  @ManyToOne(() => Employee, { nullable: true })
-  @JoinColumn({ name: 'manager_id' })
-  manager: Employee;
 
   @Column({ nullable: true })
   designation: string;
@@ -31,12 +29,18 @@ export class Employee {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   salary: number;
 
-  @OneToMany(()=>Attendence,(attendence)=>attendence.employee)
-  attendence:Attendence[]
+  @OneToMany(() => Attendence, (attendence) => attendence.employee)
+  attendence: Attendence[]
 
   @OneToMany(() => Leave, (leave) => leave.employee)
   leaves: Leave[];
 
-  @OneToMany(()=>Task,(task)=>task.employee)
-  task:Task[]
+  @OneToMany(() => Task, (task) => task.employee)
+  task: Task[]
+
+  @ManyToOne(() => Manager, (manager) => manager.employees, {
+    nullable: true,
+  })
+  @JoinColumn({ name: 'manager_id' })
+  manager: Manager;
 }
