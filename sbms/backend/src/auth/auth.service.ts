@@ -20,7 +20,10 @@ export class AuthService {
 
   async login(dto: LoginDto) {
     const user = await this.usersService.findByEmail(dto.email);
-    if (!user) throw new UnauthorizedException('Invalid credentials');
+
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
 
     if (user.status === UserStatus.INACTIVE) {
       throw new UnauthorizedException('Account is deactivated');
@@ -30,7 +33,11 @@ export class AuthService {
       dto.password,
       user.passwordHash,
     );
-    if (!passwordMatches) throw new UnauthorizedException('Invalid credentials');
+
+    if (!passwordMatches) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
     const payload = {
       sub: user.id,
       email: user.email,
@@ -47,38 +54,48 @@ export class AuthService {
       },
     };
   }
-<<<<<<< Updated upstream
-    async forgotPassword(email: string): Promise<void> {
-  const user = await this.usersService.findByEmail(email);
-  console.log('User found:', user?.email); // temporary debug log
-  if (!user) return;
 
-  const token = randomBytes(32).toString('hex');
-  const expiry = new Date(Date.now() + 30 * 60 * 1000);
+  async forgotPassword(email: string): Promise<void> {
+    const user = await this.usersService.findByEmail(email);
 
-  await this.usersService.setResetToken(email, token, expiry);
-  console.log('Reset link:', `${this.config.get('FRONTEND_URL')}/reset-password?token=${token}`); // temporary debug log
+    if (!user) {
+      return;
+    }
 
-  const resetLink = `${this.config.get<string>('FRONTEND_URL')}/reset-password?token=${token}`;
-  await this.mailService.sendPasswordResetEmail(email, resetLink);
-  console.log('Email sent successfully'); // temporary debug log
-}
+    const token = randomBytes(32).toString('hex');
+    const expiry = new Date(Date.now() + 30 * 60 * 1000);
+
+    await this.usersService.setResetToken(email, token, expiry);
+
+    const resetLink = `${this.config.get<string>('FRONTEND_URL')}/reset-password?token=${token}`;
+
+    await this.mailService.sendPasswordResetEmail(email, resetLink);
+  }
 
   async resetPassword(token: string, newPassword: string): Promise<void> {
     const user = await this.usersService.findByValidResetToken(token);
+
     if (!user) {
       throw new UnauthorizedException('Invalid or expired reset token');
     }
+
     await this.usersService.resetPasswordWithToken(user, newPassword);
-=======
+  }
 
   async changePassword(userId: number, dto: ChangePasswordDto) {
     const user = await this.usersService.findOne(userId);
-    const matches = await bcrypt.compare(dto.currentPassword, user.passwordHash);
-    if (!matches) throw new UnauthorizedException('Current password is incorrect');
+
+    const matches = await bcrypt.compare(
+      dto.currentPassword,
+      user.passwordHash,
+    );
+
+    if (!matches) {
+      throw new UnauthorizedException('Current password is incorrect');
+    }
 
     await this.usersService.resetPassword(user.id, dto.newPassword);
+
     return { message: 'Password changed successfully' };
->>>>>>> Stashed changes
   }
 }
