@@ -6,12 +6,19 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+<<<<<<< Updated upstream
 
   app.enableCors({
     origin: 'http://localhost:3001',
     credentials: true,
   });
 
+=======
+  app.enableCors({
+    origin: 'http://localhost:3001', 
+    credentials: true,
+  });
+>>>>>>> Stashed changes
   app.setGlobalPrefix('api/v1');
   app.useGlobalPipes(
     new ValidationPipe({

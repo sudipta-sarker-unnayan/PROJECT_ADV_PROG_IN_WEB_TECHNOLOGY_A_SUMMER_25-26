@@ -71,6 +71,7 @@ private readonly logger = new Logger(UsersService.name);
     });
   }
 
+
   async findOne(id: number): Promise<User> {
     const user = await this.usersRepo.findOne({ where: { id } });
     if (!user) throw new NotFoundException(`User #${id} not found`);
