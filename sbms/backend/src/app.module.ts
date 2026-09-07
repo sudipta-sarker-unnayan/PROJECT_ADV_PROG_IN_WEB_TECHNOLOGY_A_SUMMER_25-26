@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { DepartmentsModule } from './departments/departments.module';
 import { EmployeesModule } from './employees/employees.module';
 import { ClientsModule } from './clients/clients.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
@@ -24,6 +25,7 @@ import { CacheModule } from '@nestjs/cache-manager';
     DepartmentsModule,
     EmployeesModule,
     ClientsModule,
+    DashboardModule,
     //   ProjectsModule, AttendanceModule,
     // LeaveModule, DashboardModule 
   ],

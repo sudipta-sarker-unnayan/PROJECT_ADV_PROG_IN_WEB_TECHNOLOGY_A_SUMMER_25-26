@@ -3,13 +3,17 @@ import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-app.enableCors({
-  origin: 'http://localhost:3001',
-  credentials: true,
-});
+
+  app.enableCors({
+    origin: 'http://localhost:3001',
+    credentials: true,
+  });
+
   app.setGlobalPrefix('api/v1');
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -17,7 +21,9 @@ app.enableCors({
       transform: true,
     }),
   );
+
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+
   app.useGlobalFilters(new AllExceptionsFilter());
 
   const port = process.env.PORT ?? 3000;
@@ -29,9 +35,14 @@ app.enableCors({
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
+
   SwaggerModule.setup('api/v1/docs', app, document);
 
   await app.listen(port);
-  console.log(`SBMS Super Admin API running on http://localhost:${port}/api/v1`);
+
+  console.log(
+    `SBMS Super Admin API running on http://localhost:${port}/api/v1`,
+  );
 }
-bootstrap();
+
+void bootstrap();
