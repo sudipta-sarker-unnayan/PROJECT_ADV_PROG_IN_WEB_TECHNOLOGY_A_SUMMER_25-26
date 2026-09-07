@@ -25,12 +25,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  // পেজ রিফ্রেশ হলে localStorage থেকে সেশন restore করা
+  // Restore session from localStorage on page refresh
   useEffect(() => {
     const storedUser = localStorage.getItem("sbms_user");
     const storedToken = localStorage.getItem("sbms_token");
     if (storedUser && storedToken) {
-      setUser(JSON.parse(storedUser));
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch {
+        localStorage.removeItem("sbms_user");
+        localStorage.removeItem("sbms_token");
+      }
     }
     setIsLoading(false);
   }, []);

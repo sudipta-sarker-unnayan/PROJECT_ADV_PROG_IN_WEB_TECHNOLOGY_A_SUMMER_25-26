@@ -45,8 +45,12 @@ export default function UsersPage() {
       });
       setUsers(res.data);
       setTotal(res.total);
-    } catch {
-      setError("Failed to load users");
+    } catch (err: any) {
+      if (err?.isForbidden) {
+        setError("You do not have permission to view this page.");
+      } else {
+        setError("Failed to load users");
+      }
     } finally {
       setIsLoading(false);
     }
