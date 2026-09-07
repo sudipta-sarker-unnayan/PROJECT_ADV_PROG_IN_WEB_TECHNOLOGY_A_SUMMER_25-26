@@ -1,45 +1,101 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as nodemailer from 'nodemailer';
+import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
+import { randomBytes } from 'crypto';
+import { UsersService } from '../users/users.service';
+import { MailService } from '../mail/mail.service';
+import { UserStatus } from '../users/entities/user.entity';
+import { LoginDto } from './dto/login.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Injectable()
-export class MailService {
-  private readonly logger = new Logger(MailService.name);
-  private transporter;
+export class AuthService {
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly jwtService: JwtService,
+    private readonly mailService: MailService,
+    private readonly config: ConfigService,
+  ) {}
 
-  constructor(private readonly config: ConfigService) {
-    this.transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: this.config.get<string>('MAIL_USER'),
-        pass: this.config.get<string>('MAIL_PASSWORD'),
+  async login(dto: LoginDto) {
+    const user = await this.usersService.findByEmail(dto.email);
+
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    if (user.status === UserStatus.INACTIVE) {
+      throw new UnauthorizedException('Account is deactivated');
+    }
+
+    const passwordMatches = await bcrypt.compare(
+      dto.password,
+      user.passwordHash,
+    );
+
+    if (!passwordMatches) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role.name,
+    };
+
+    return {
+      accessToken: this.jwtService.sign(payload),
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role.name,
       },
-    });
+    };
   }
 
-  async sendPasswordResetEmail(to: string, resetLink: string): Promise<void> {
-    try {
-      await this.transporter.sendMail({
-        from: `"SBMS Support" <${this.config.get<string>('MAIL_USER')}>`,
-        to,
-        subject: 'Password Reset Request - SBMS',
-        html: `
-          <div style="font-family: sans-serif; max-width: 500px; margin: auto;">
-            <h2>Reset Your Password</h2>
-            <p>You have requested to reset the password for your SBMS account.</p>
-            <p>Click the button below to set a new password (this link will expire in 30 minutes):</p>
-            <a href="${resetLink}" style="display:inline-block;padding:10px 20px;background:#4f46e5;color:#fff;text-decoration:none;border-radius:6px;">
-              Reset Password
-            </a>
-            <p style="color:#666;font-size:12px;margin-top:20px;">
-              If you did not request this, please ignore this email.
-            </p>
-          </div>
-        `,
-      });
-    } catch (err) {
-      this.logger.error('Failed to send reset email', err);
-      throw err;
+  async forgotPassword(email: string): Promise<void> {
+    const user = await this.usersService.findByEmail(email);
+
+    if (!user) {
+      return;
     }
+
+    const token = randomBytes(32).toString('hex');
+    const expiry = new Date(Date.now() + 30 * 60 * 1000);
+
+    await this.usersService.setResetToken(email, token, expiry);
+
+    const resetLink = `${this.config.get<string>('FRONTEND_URL')}/reset-password?token=${token}`;
+
+    await this.mailService.sendPasswordResetEmail(email, resetLink);
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<void> {
+    const user = await this.usersService.findByValidResetToken(token);
+
+    if (!user) {
+      throw new UnauthorizedException('Invalid or expired reset token');
+    }
+
+    await this.usersService.resetPasswordWithToken(user, newPassword);
+  }
+
+  async changePassword(userId: number, dto: ChangePasswordDto) {
+    const user = await this.usersService.findOne(userId);
+
+    const matches = await bcrypt.compare(
+      dto.currentPassword,
+      user.passwordHash,
+    );
+
+    if (!matches) {
+      throw new UnauthorizedException('Current password is incorrect');
+    }
+
+    await this.usersService.resetPassword(user.id, dto.newPassword);
+
+    return { message: 'Password changed successfully' };
   }
 }
