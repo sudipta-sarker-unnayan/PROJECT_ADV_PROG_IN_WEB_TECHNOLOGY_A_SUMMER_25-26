@@ -3,8 +3,14 @@ import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  app.enableCors({
+    origin: 'http://localhost:3001',
+    credentials: true,
+  });
 
   app.setGlobalPrefix('api/v1');
   app.useGlobalPipes(
@@ -29,6 +35,8 @@ async function bootstrap() {
   SwaggerModule.setup('api/v1/docs', app, document);
 
   await app.listen(port);
-  console.log(`SBMS Super Admin API running on http://localhost:${port}/api/v1`);
+  console.log(
+    `SBMS Super Admin API running on http://localhost:${port}/api/v1`,
+  );
 }
-bootstrap();
+void bootstrap();

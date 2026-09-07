@@ -3,6 +3,7 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+    UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ILike, Repository } from 'typeorm';
@@ -110,4 +111,42 @@ private readonly logger = new Logger(UsersService.name);
     user.passwordHash = await bcrypt.hash(newPassword, 10);
     return this.usersRepo.save(user);
   }
+  async changeOwnPassword(
+    userId: number,
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<void> {
+    const user = await this.findOne(userId);
+
+    const matches = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!matches) {
+      throw new UnauthorizedException('Current password is incorrect');
+    }
+
+    user.passwordHash = await bcrypt.hash(newPassword, 10);
+    await this.usersRepo.save(user);
+  }
+    async setResetToken(email: string, token: string, expiry: Date): Promise<User | null> {
+    const user = await this.findByEmail(email);
+    if (!user) return null;
+    user.resetToken = token;
+    user.resetTokenExpiry = expiry;
+    await this.usersRepo.save(user);
+    return user;
+  }
+
+  async findByValidResetToken(token: string): Promise<User | null> {
+    const user = await this.usersRepo.findOne({ where: { resetToken: token } });
+    if (!user || !user.resetTokenExpiry) return null;
+    if (user.resetTokenExpiry.getTime() < Date.now()) return null;
+    return user;
+  }
+
+  async resetPasswordWithToken(user: User, newPassword: string): Promise<void> {
+    user.passwordHash = await bcrypt.hash(newPassword, 10);
+    user.resetToken = null;
+    user.resetTokenExpiry = null;
+    await this.usersRepo.save(user);
+  }
 }
+
