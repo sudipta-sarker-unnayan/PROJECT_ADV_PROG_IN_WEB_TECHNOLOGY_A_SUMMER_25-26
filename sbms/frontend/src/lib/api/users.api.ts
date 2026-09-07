@@ -6,13 +6,29 @@ import {
   UpdateUserPayload,
 } from "../types/user.types";
 
+type RawUsersResponse =
+  | [User[], number]
+  | { data: User[]; total: number }
+  | { data: User[]; meta: { total: number } };
+
+function normalizeUsersResponse(raw: RawUsersResponse): PaginatedUsers {
+  if (Array.isArray(raw)) {
+    const [data, total] = raw;
+    return { data, total };
+  }
+  if ("total" in raw) {
+    return { data: raw.data, total: raw.total };
+  }
+  return { data: raw.data, total: raw.meta.total };
+}
+
 export async function fetchUsers(params: {
   page: number;
   limit: number;
   search?: string;
 }): Promise<PaginatedUsers> {
-  const { data } = await api.get<[User[], number]>("/users", { params });
-  return { data: data[0], total: data[1] };
+  const { data } = await api.get<RawUsersResponse>("/users", { params });
+  return normalizeUsersResponse(data);
 }
 
 export async function createUser(payload: CreateUserPayload): Promise<User> {

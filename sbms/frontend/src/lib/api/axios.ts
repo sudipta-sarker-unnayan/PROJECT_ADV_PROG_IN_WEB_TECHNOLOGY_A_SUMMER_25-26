@@ -5,7 +5,7 @@ export const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-// প্রতিটা রিকোয়েস্টে টোকেন attach করা
+// Attach the access token to every outgoing request
 api.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
     const token = localStorage.getItem("sbms_token");
@@ -16,15 +16,20 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// টোকেন invalid/expired হলে অটো লগআউট
+// Auto-logout on an expired/invalid token; tag 403s so callers can
+// distinguish "not logged in" from "logged in but not permitted"
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401 && typeof window !== "undefined") {
-      localStorage.removeItem("sbms_token");
-      localStorage.removeItem("sbms_user");
-      if (window.location.pathname !== "/login") {
-        window.location.href = "/login";
+    if (typeof window !== "undefined") {
+      if (error.response?.status === 401) {
+        localStorage.removeItem("sbms_token");
+        localStorage.removeItem("sbms_user");
+        if (window.location.pathname !== "/login") {
+          window.location.href = "/login";
+        }
+      } else if (error.response?.status === 403) {
+        error.isForbidden = true;
       }
     }
     return Promise.reject(error);
