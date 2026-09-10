@@ -25,13 +25,19 @@ export class AuthController {
   @Post('forgot-password')
   async forgotPassword(@Body() dto: ForgotPasswordDto) {
     await this.authService.forgotPassword(dto.email);
-    return { message: 'Password reset link has been sent to your email' };
+
+    return {
+      message: 'Password reset link has been sent to your email',
+    };
   }
 
   @Post('reset-password')
   async resetPassword(@Body() dto: ResetPasswordDto) {
     await this.authService.resetPassword(dto.token, dto.newPassword);
-    return { message: 'Password has been reset successfully' };
+
+    return {
+      message: 'Password has been reset successfully',
+    };
   }
 
   @UseGuards(JwtAuthGuard)
