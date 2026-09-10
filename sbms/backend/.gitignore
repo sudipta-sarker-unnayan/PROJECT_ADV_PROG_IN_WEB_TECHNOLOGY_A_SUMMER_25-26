@@ -28,3 +28,11 @@ coverage/
 
 # NestJS
 *.tsbuildinfo
+
+# Next.js
+.next/
+out/
+
+# build output
+dist/
+build/
