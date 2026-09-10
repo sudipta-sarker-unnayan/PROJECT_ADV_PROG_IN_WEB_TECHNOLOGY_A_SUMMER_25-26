@@ -48,28 +48,36 @@ private readonly logger = new Logger(UsersService.name);
   }
 
   async findAll(query: PaginationQueryDto): Promise<[User[], number]> {
-    const {
-      page = 1,
-      limit = 10,
-      sortBy = 'id',
-      sortOrder = 'ASC',
-      search,
-    } = query;
+  const {
+    page = 1,
+    limit = 10,
+    sortBy = 'id',
+    sortOrder = 'ASC',
+    search,
+    role,
+  } = query;
 
-    return this.usersRepo.findAndCount({
-      where: search
-        ? {
-            name: ILike(`%${search}%`),
-            email: ILike(`%${search}%`),
-          }
-        : {},
-      order: {
-        [sortBy]: sortOrder,
-      },
-      skip: (page - 1) * limit,
-      take: limit,
-    });
+  const baseWhere: Record<string, any> = {};
+  if (role) {
+    baseWhere.role = { name: role };
   }
+
+  const where = search
+    ? [
+        { ...baseWhere, name: ILike(`%${search}%`) },
+        { ...baseWhere, email: ILike(`%${search}%`) },
+      ]
+    : baseWhere;
+
+  return this.usersRepo.findAndCount({
+    where,
+    order: {
+      [sortBy]: sortOrder,
+    },
+    skip: (page - 1) * limit,
+    take: limit,
+  });
+}
 
 
   async findOne(id: number): Promise<User> {

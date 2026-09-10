@@ -22,10 +22,10 @@ export class MailService {
       await this.transporter.sendMail({
         from: `"SBMS Support" <${this.config.get<string>('MAIL_USER')}>`,
         to,
-        subject: 'Password Reset Request - SBMS',
+        subject: 'Password Reset - SBMS',
         html: `
           <div style="font-family: sans-serif; max-width: 500px; margin: auto;">
-            <h2>Reset Your Password</h2>
+            <h2>Password Reset</h2>
             <p>You have requested to reset the password for your SBMS account.</p>
             <p>Click the button below to set a new password (this link will expire in 30 minutes):</p>
             <a href="${resetLink}" style="display:inline-block;padding:10px 20px;background:#4f46e5;color:#fff;text-decoration:none;border-radius:6px;">
