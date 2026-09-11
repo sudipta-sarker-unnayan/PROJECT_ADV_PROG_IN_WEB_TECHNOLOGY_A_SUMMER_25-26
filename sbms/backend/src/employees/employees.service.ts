@@ -7,18 +7,13 @@ import { Department } from '../departments/entities/department.entity';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { RoleName } from '../roles/entities/role.entity';
-import { Manager } from 'src/managers/entities/manager.entity';
-
 @Injectable()
 export class EmployeesService {
   constructor(
     @InjectRepository(Employee) private readonly employeesRepo: Repository<Employee>,
     @InjectRepository(User) private readonly usersRepo: Repository<User>,
     @InjectRepository(Department) private readonly departmentsRepo: Repository<Department>,
-<<<<<<< HEAD:sbms/src/employees/employees.service.ts
-    @InjectRepository(Manager) private readonly managerRepo: Repository<Manager>,
-=======
->>>>>>> Full-Backend:sbms/backend/src/employees/employees.service.ts
+    @InjectRepository(Employee) private readonly managerRepo: Repository<Employee>,
   ) { }
 
   async create(dto: CreateEmployeeDto): Promise<Employee> {
@@ -107,21 +102,13 @@ export class EmployeesService {
     return department;
   }
 
-<<<<<<< HEAD:sbms/src/employees/employees.service.ts
-  private async findManagerOrFail(id: number): Promise<Manager> {
-    const manager = await this.managerRepo.findOne({
+  private async findManagerOrFail(id: number): Promise<Employee> {
+    const manager = await this.employeesRepo.findOne({
       where: { id },
     });
 
     if (!manager) {
       throw new NotFoundException(`Manager #${id} not found`);
-=======
-  private async findManagerOrFail(id: number): Promise<Employee> {
-    const manager = await this.employeesRepo.findOne({ where: { id } });
-
-    if (!manager) {
-      throw new NotFoundException(`Manager (Employee) #${id} not found`);
->>>>>>> Full-Backend:sbms/backend/src/employees/employees.service.ts
     }
 
     return manager;

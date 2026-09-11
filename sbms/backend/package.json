@@ -35,16 +35,9 @@
     "cache-manager": "^7.2.9",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
-<<<<<<< HEAD:sbms/package.json
-    "dotenv": "^17.4.2",
-=======
-<<<<<<< HEAD
     "dotenv": "^17.4.2",
     "multer": "^2.3.0",
-=======
-    "nodemailer": "^10.0.0",
->>>>>>> origin/Full-Backend
->>>>>>> Full-Backend:sbms/backend/package.json
+    "nodemailer": "^10.0.6",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "pg": "^8.23.0",
