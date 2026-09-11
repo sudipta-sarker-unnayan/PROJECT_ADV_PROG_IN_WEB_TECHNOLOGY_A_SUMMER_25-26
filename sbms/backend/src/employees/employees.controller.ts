@@ -27,10 +27,7 @@ interface CurrentUserPayload {
 }
 
 @UseGuards(JwtAuthGuard, RolesGuard)
-<<<<<<< HEAD:sbms/src/employees/employees.controller.ts
 @Roles(RoleName.SUPER_ADMIN,RoleName.MANAGER)
-=======
->>>>>>> Full-Backend:sbms/backend/src/employees/employees.controller.ts
 @Controller('employees')
 export class EmployeesController {
   constructor(private readonly employeesService: EmployeesService) {}
