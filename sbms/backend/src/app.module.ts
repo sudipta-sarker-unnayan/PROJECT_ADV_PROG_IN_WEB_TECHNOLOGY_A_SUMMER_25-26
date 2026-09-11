@@ -7,8 +7,18 @@ import { AuthModule } from './auth/auth.module';
 import { DepartmentsModule } from './departments/departments.module';
 import { EmployeesModule } from './employees/employees.module';
 import { ClientsModule } from './clients/clients.module';
+<<<<<<< HEAD:sbms/src/app.module.ts
+import { AttendenceModule } from './attendence/attendence.module';
+import { LeaveModule } from './leave/leave.module';
+import { TaskModule } from './task/task.module';
+import { ManagersModule } from './managers/managers.module';
+=======
 import { DashboardModule } from './dashboard/dashboard.module';
 import { CacheModule } from '@nestjs/cache-manager';
+import { AttendenceModule } from './attendence/attendence.module';
+import { LeaveModule } from './leave/leave.module';
+import { TaskModule } from './task/task.module';
+>>>>>>> Full-Backend:sbms/backend/src/app.module.ts
 
 @Module({
   imports: [
@@ -25,7 +35,21 @@ import { CacheModule } from '@nestjs/cache-manager';
     DepartmentsModule,
     EmployeesModule,
     ClientsModule,
+<<<<<<< HEAD:sbms/src/app.module.ts
+    AttendenceModule,
+    LeaveModule,
+    TaskModule,
+    ManagersModule,
+    
+=======
+<<<<<<< HEAD
+    AttendenceModule,
+    LeaveModule,
+    TaskModule,
+=======
     DashboardModule,
+>>>>>>> origin/Full-Backend
+>>>>>>> Full-Backend:sbms/backend/src/app.module.ts
     //   ProjectsModule, AttendanceModule,
     // LeaveModule, DashboardModule 
   ],

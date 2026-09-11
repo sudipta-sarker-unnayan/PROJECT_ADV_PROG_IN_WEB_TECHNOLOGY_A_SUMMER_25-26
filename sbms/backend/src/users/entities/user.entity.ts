@@ -1,14 +1,20 @@
+<<<<<<< HEAD:sbms/src/users/entities/user.entity.ts
 import {
   Column,
   CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+=======
+import {Column,CreateDateColumn,Entity,JoinColumn,ManyToOne,PrimaryGeneratedColumn,UpdateDateColumn} from 'typeorm';
+>>>>>>> Full-Backend:sbms/backend/src/users/entities/user.entity.ts
 import { Exclude } from 'class-transformer';
 import { Role } from '../../roles/entities/role.entity';
+import { Manager } from 'src/managers/entities/manager.entity';
 
 export enum UserStatus {
   ACTIVE = 'active',
@@ -20,6 +26,7 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
+  
   @Column()
   name: string;
 
@@ -60,4 +67,11 @@ export class User {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+<<<<<<< HEAD:sbms/src/users/entities/user.entity.ts
+
+  @OneToOne(() => Manager, (manager) => manager.user)
+  manager: Manager;
 }
+=======
+}
+>>>>>>> Full-Backend:sbms/backend/src/users/entities/user.entity.ts

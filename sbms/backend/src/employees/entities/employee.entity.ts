@@ -1,13 +1,9 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Department } from '../../departments/entities/department.entity';
+import { Attendence } from 'src/attendence/entities/attendence.entity';
+import { Leave } from 'src/leave/entities/leave.entity';
+import { Task } from 'src/task/entities/task.entity';
 
 @Entity('employees')
 export class Employee {
@@ -25,13 +21,28 @@ export class Employee {
   @JoinColumn({ name: 'department_id' })
   department: Department;
 
-  @ManyToOne(() => Employee, { nullable: true })
-  @JoinColumn({ name: 'manager_id' })
-  manager: Employee;
 
   @Column({ nullable: true })
   designation: string;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   salary: number;
+
+  @OneToMany(() => Attendence, (attendence) => attendence.employee)
+  attendence: Attendence[]
+
+  @OneToMany(() => Leave, (leave) => leave.employee)
+  leaves: Leave[];
+
+  @OneToMany(() => Task, (task) => task.employee)
+  task: Task[]
+
+  @ManyToOne(() => Employee, (employee) => employee.subordinates, {
+    nullable: true,
+  })
+  @JoinColumn({ name: 'manager_id' })
+  manager: Employee;
+
+  @OneToMany(() => Employee, (employee) => employee.manager)
+  subordinates: Employee[];
 }

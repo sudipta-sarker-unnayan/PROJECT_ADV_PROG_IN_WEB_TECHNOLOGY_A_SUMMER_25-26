@@ -1,34 +1,37 @@
-import {
-  BadRequestException,
-  ConflictException,
-  Injectable,
-    Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import {BadRequestException,ConflictException,Injectable,NotFoundException} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ILike, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Employee } from './entities/employee.entity';
 import { User } from '../users/entities/user.entity';
 import { Department } from '../departments/entities/department.entity';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { RoleName } from '../roles/entities/role.entity';
-import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { Manager } from 'src/managers/entities/manager.entity';
 
 @Injectable()
 export class EmployeesService {
-  private readonly logger = new Logger(EmployeesService.name);
   constructor(
     @InjectRepository(Employee) private readonly employeesRepo: Repository<Employee>,
     @InjectRepository(User) private readonly usersRepo: Repository<User>,
     @InjectRepository(Department) private readonly departmentsRepo: Repository<Department>,
-  ) {}
+<<<<<<< HEAD:sbms/src/employees/employees.service.ts
+    @InjectRepository(Manager) private readonly managerRepo: Repository<Manager>,
+=======
+>>>>>>> Full-Backend:sbms/backend/src/employees/employees.service.ts
+  ) { }
 
   async create(dto: CreateEmployeeDto): Promise<Employee> {
     const user = await this.usersRepo.findOne({ where: { id: dto.userId } });
     if (!user) throw new NotFoundException(`User #${dto.userId} not found`);
-    if (user.role.name !== RoleName.EMPLOYEE) {
-      throw new BadRequestException(`User #${dto.userId} does not have the employee role`);
+
+    if (
+      user.role.name !== RoleName.EMPLOYEE &&
+      user.role.name !== RoleName.MANAGER
+    ) {
+      throw new BadRequestException(
+        `User #${dto.userId} does not have the employee or manager role`,
+      );
     }
 
     const existing = await this.employeesRepo.findOne({ where: { user: { id: dto.userId } } });
@@ -40,41 +43,14 @@ export class EmployeesService {
       employee.department = await this.findDepartmentOrFail(dto.departmentId);
     }
     if (dto.managerId) {
-      employee.manager = await this.findEmployeeOrFail(dto.managerId);
+      employee.manager = await this.findManagerOrFail(dto.managerId);
     }
 
     return this.employeesRepo.save(employee);
   }
 
-  async findAll(query: PaginationQueryDto) {
-    const {
-      page = 1,
-      limit = 10,
-      sortBy = 'id',
-      sortOrder = 'ASC',
-      search,
-    } = query;
-
-    const [data, total] = await this.employeesRepo.findAndCount({
-      where: search
-        ? {
-            designation: ILike(`%${search}%`),
-          }
-        : {},
-      order: {
-        [sortBy]: sortOrder,
-      },
-      skip: (page - 1) * limit,
-      take: limit,
-    });
-
-    return {
-      data,
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
-    };
+  findAll(): Promise<Employee[]> {
+    return this.employeesRepo.find();
   }
 
   async findOne(id: number): Promise<Employee> {
@@ -91,7 +67,7 @@ export class EmployeesService {
       if (dto.managerId === id) {
         throw new BadRequestException('An employee cannot be their own manager');
       }
-      employee.manager = await this.findEmployeeOrFail(dto.managerId);
+      employee.manager = await this.findManagerOrFail(dto.managerId);
     }
 
     Object.assign(employee, {
@@ -107,6 +83,18 @@ export class EmployeesService {
     await this.employeesRepo.remove(employee);
   }
 
+  async findByUserId(userId: number): Promise<Employee> {
+    const employee = await this.employeesRepo.findOne({
+      where: { user: { id: userId } },
+    });
+    if (!employee) {
+      throw new NotFoundException(
+        'No employee profile is linked to this account',
+      );
+    }
+    return employee;
+  }
+
   private async findEmployeeOrFail(id: number): Promise<Employee> {
     const employee = await this.employeesRepo.findOne({ where: { id } });
     if (!employee) throw new NotFoundException(`Employee #${id} not found`);
@@ -117,5 +105,25 @@ export class EmployeesService {
     const department = await this.departmentsRepo.findOne({ where: { id } });
     if (!department) throw new NotFoundException(`Department #${id} not found`);
     return department;
+  }
+
+<<<<<<< HEAD:sbms/src/employees/employees.service.ts
+  private async findManagerOrFail(id: number): Promise<Manager> {
+    const manager = await this.managerRepo.findOne({
+      where: { id },
+    });
+
+    if (!manager) {
+      throw new NotFoundException(`Manager #${id} not found`);
+=======
+  private async findManagerOrFail(id: number): Promise<Employee> {
+    const manager = await this.employeesRepo.findOne({ where: { id } });
+
+    if (!manager) {
+      throw new NotFoundException(`Manager (Employee) #${id} not found`);
+>>>>>>> Full-Backend:sbms/backend/src/employees/employees.service.ts
+    }
+
+    return manager;
   }
 }

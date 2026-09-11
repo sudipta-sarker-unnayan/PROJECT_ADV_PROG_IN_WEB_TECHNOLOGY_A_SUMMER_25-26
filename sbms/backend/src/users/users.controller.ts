@@ -62,10 +62,8 @@ export class UsersController {
   }
 
   @Patch(':id/reset-password')
-  resetPassword(
-    @Param('id', ParseIntPipe) id: number,
-    @Body('newPassword') newPassword: string,
-  ) {
+  resetPassword(@Param('id', ParseIntPipe) id: number,@Body('newPassword') newPassword: string){
     return this.usersService.resetPassword(id, newPassword);
   }
 }
+
