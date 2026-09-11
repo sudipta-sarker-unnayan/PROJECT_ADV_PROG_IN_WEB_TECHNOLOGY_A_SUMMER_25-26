@@ -20,6 +20,7 @@ import { RoleName } from '../roles/entities/role.entity';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 
+
 interface CurrentUserPayload {
   userId: number;
   email: string;
@@ -46,8 +47,8 @@ export class EmployeesController {
 
   @Get()
   @Roles(RoleName.SUPER_ADMIN)
-  findAll() {
-    return this.employeesService.findAll();
+  findAll(@Query() query: PaginationQueryDto) {
+    return this.employeesService.findAll(query);
   }
 
   @Get(':id')

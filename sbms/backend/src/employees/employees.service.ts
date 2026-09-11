@@ -1,12 +1,13 @@
 import {BadRequestException,ConflictException,Injectable,NotFoundException} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { Employee } from './entities/employee.entity';
 import { User } from '../users/entities/user.entity';
 import { Department } from '../departments/entities/department.entity';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { RoleName } from '../roles/entities/role.entity';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 @Injectable()
 export class EmployeesService {
   constructor(
@@ -44,8 +45,22 @@ export class EmployeesService {
     return this.employeesRepo.save(employee);
   }
 
-  findAll(): Promise<Employee[]> {
-    return this.employeesRepo.find();
+  async findAll(query: PaginationQueryDto): Promise<[Employee[], number]> {
+    const {
+      page = 1,
+      limit = 10,
+      sortBy = 'id',
+      sortOrder = 'ASC',
+      search,
+    } = query;
+
+    return this.employeesRepo.findAndCount({
+      where: search ? { designation: ILike(`%${search}%`) } : {},
+      order: { [sortBy]: sortOrder },
+      skip: (page - 1) * limit,
+      take: limit,
+      relations: { manager: true },
+    });
   }
 
   async findOne(id: number): Promise<Employee> {
@@ -91,7 +106,10 @@ export class EmployeesService {
   }
 
   private async findEmployeeOrFail(id: number): Promise<Employee> {
-    const employee = await this.employeesRepo.findOne({ where: { id } });
+    const employee = await this.employeesRepo.findOne({
+      where: { id },
+      relations: { manager: true },
+    });
     if (!employee) throw new NotFoundException(`Employee #${id} not found`);
     return employee;
   }
