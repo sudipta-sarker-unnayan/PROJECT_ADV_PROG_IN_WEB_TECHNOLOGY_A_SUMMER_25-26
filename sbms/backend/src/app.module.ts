@@ -11,6 +11,7 @@ import { AttendenceModule } from './attendence/attendence.module';
 import { LeaveModule } from './leave/leave.module';
 import { TaskModule } from './task/task.module';
 import { CacheModule } from '@nestjs/cache-manager';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { CacheModule } from '@nestjs/cache-manager';
     AttendenceModule,
     LeaveModule,
     TaskModule,
+    DashboardModule,
   ],
 })
 export class AppModule {}
