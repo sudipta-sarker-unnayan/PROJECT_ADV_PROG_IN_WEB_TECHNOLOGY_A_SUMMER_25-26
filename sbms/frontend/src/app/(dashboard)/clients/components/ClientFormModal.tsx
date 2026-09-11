@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Resolver, FieldErrors } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   createClientSchema,
@@ -40,7 +40,7 @@ export default function ClientFormModal({
     reset,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(schema) as Resolver<FormValues>,
   });
 
   useEffect(() => {
@@ -55,8 +55,6 @@ export default function ClientFormModal({
   useEffect(() => {
     if (mode !== "create") return;
     let cancelled = false;
-    setUsersLoading(true);
-    setUsersError(null);
     fetchEligibleUsersForClient()
       .then((users) => {
         if (!cancelled) setEligibleUsers(users);
@@ -115,9 +113,12 @@ export default function ClientFormModal({
                   client role first.
                 </span>
               )}
-              {"userId" in errors && errors.userId && (
+              {(errors as FieldErrors<CreateClientFormValues>).userId && (
                 <span className="text-error text-sm mt-1">
-                  {(errors as any).userId.message}
+                  {
+                    (errors as FieldErrors<CreateClientFormValues>).userId
+                      ?.message
+                  }
                 </span>
               )}
             </label>
