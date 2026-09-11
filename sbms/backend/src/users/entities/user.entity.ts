@@ -1,12 +1,4 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import {Column,CreateDateColumn,Entity,JoinColumn,ManyToOne,PrimaryGeneratedColumn,UpdateDateColumn} from 'typeorm';
 import { Exclude } from 'class-transformer';
 import { Role } from '../../roles/entities/role.entity';
 
@@ -20,6 +12,7 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
+  
   @Column()
   name: string;
 

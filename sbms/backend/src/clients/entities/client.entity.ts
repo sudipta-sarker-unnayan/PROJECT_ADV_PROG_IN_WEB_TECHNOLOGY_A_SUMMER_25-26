@@ -2,10 +2,12 @@ import {
   Column,
   Entity,
   JoinColumn,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
+import { Task } from 'src/task/entities/task.entity';
 
 @Entity('clients')
 export class Client {
@@ -21,4 +23,7 @@ export class Client {
 
   @Column({ nullable: true })
   phone: string;
+
+  @OneToMany(() => Task, (task) => task.client)
+  tasks: Task[];
 }

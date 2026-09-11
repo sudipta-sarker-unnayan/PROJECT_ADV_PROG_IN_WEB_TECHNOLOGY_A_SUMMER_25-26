@@ -75,6 +75,18 @@ export class ClientsService {
     return this.findClientOrFail(id);
   }
 
+  async findByUserId(userId: number): Promise<Client> {
+    const client = await this.clientsRepo.findOne({
+      where: { user: { id: userId } },
+    });
+    if (!client) {
+      throw new NotFoundException(
+        'No client profile is linked to this account',
+      );
+    }
+    return client;
+  }
+
   async update(id: number, dto: UpdateClientDto): Promise<Client> {
     const client = await this.findClientOrFail(id);
     Object.assign(client, {

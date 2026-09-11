@@ -3,8 +3,21 @@ import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { mkdirSync } from 'fs';
+import { join } from 'path';
+import * as express from 'express';
+
 async function bootstrap() {
+
+  mkdirSync(join(process.cwd(), 'uploads', 'tasks'), { recursive: true });
+  mkdirSync(join(process.cwd(), 'uploads', 'completed'), { recursive: true });
+
   const app = await NestFactory.create(AppModule);
+
+  app.use(
+    '/uploads',
+    express.static(join(process.cwd(), 'uploads')),
+  );
 
   app.setGlobalPrefix('api/v1');
   app.useGlobalPipes(
@@ -29,6 +42,6 @@ async function bootstrap() {
   SwaggerModule.setup('api/v1/docs', app, document);
 
   await app.listen(port);
-  console.log(`SBMS Super Admin API running on http://localhost:${port}/api/v1`);
+  console.log(`SBMS project running on http://localhost:${port}/api/v1`);
 }
 bootstrap();
