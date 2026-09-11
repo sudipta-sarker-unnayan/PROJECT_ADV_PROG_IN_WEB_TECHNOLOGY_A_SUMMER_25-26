@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { DepartmentsModule } from './departments/departments.module';
 import { EmployeesModule } from './employees/employees.module';
 import { ClientsModule } from './clients/clients.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { AttendenceModule } from './attendence/attendence.module';
 import { LeaveModule } from './leave/leave.module';
@@ -27,9 +28,13 @@ import { TaskModule } from './task/task.module';
     DepartmentsModule,
     EmployeesModule,
     ClientsModule,
+<<<<<<< HEAD
     AttendenceModule,
     LeaveModule,
     TaskModule,
+=======
+    DashboardModule,
+>>>>>>> origin/Full-Backend
     //   ProjectsModule, AttendanceModule,
     // LeaveModule, DashboardModule 
   ],

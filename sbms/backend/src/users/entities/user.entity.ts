@@ -27,11 +27,29 @@ export class User {
   @JoinColumn({ name: 'role_id' })
   role: Role;
 
-  @Column({ type: 'enum', enum: UserStatus, default: UserStatus.ACTIVE })
+  @Column({
+    type: 'enum',
+    enum: UserStatus,
+    default: UserStatus.ACTIVE,
+  })
   status: UserStatus;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
+
+  @Column({
+    type: 'varchar',
+    name: 'reset_token',
+    nullable: true,
+  })
+  resetToken: string | null;
+
+  @Column({
+    name: 'reset_token_expiry',
+    type: 'timestamp',
+    nullable: true,
+  })
+  resetTokenExpiry: Date | null;
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
