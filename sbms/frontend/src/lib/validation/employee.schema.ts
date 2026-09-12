@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const createEmployeeSchema = z.object({
-  userId: z.coerce.number({ required_error: "Please select a user" }).int(),
+  userId: z.coerce.number({ error: "Please select a user" }).int(),
   departmentId: z.coerce.number().int().optional(),
   managerId: z.coerce.number().int().optional(),
   designation: z.string().optional(),

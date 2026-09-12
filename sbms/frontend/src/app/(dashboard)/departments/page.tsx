@@ -1,5 +1,5 @@
 "use client";
-
+import axios from "axios";
 import { useEffect, useState, useCallback } from "react";
 import {
   fetchDepartments,
@@ -23,7 +23,7 @@ export default function DepartmentsPage() {
   const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
   const [modalMode, setModalMode] = useState<"create" | "edit" | null>(null);
   const [selectedDepartment, setSelectedDepartment] =
     useState<Department | null>(null);
@@ -41,12 +41,18 @@ export default function DepartmentsPage() {
       });
       setDepartments(res.data);
       setTotal(res.total);
-    } catch (err: any) {
-      if (err?.isForbidden) {
+    } catch (err) {
+      const isForbidden =
+        typeof err === "object" &&
+        err !== null &&
+        "isForbidden" in err &&
+        (err as { isForbidden?: boolean }).isForbidden;
+
+     if (isForbidden) {
         setError("You do not have permission to view this page.");
-      } else {
-        setError("Failed to load departments");
-      }
+     } else {
+      setError("Failed to load departments");
+     }
     } finally {
       setIsLoading(false);
     }
@@ -72,15 +78,20 @@ export default function DepartmentsPage() {
   }
 
   async function handleDelete(department: Department) {
-    if (!confirm(`Are you sure you want to delete ${department.name}?`)) return;
-    setDeletingId(department.id);
-    try {
-      await deleteDepartment(department.id);
-      loadDepartments();
-    } finally {
-      setDeletingId(null);
-    }
+  if (!confirm(`Are you sure you want to delete ${department.name}?`)) return;
+  setDeletingId(department.id);
+  try {
+    await deleteDepartment(department.id);
+    loadDepartments();
+  } catch (err) {
+    const message = axios.isAxiosError(err)
+      ? (err.response?.data as { message?: string } | undefined)?.message
+      : undefined;
+    setError(message ?? "Failed to delete department. It may still be in use.");
+  } finally {
+    setDeletingId(null);
   }
+}
 
   return (
     <div className="p-6">
@@ -160,7 +171,6 @@ export default function DepartmentsPage() {
                          ) : (
                            "Delete"
                          )}
-                      </button>
                       </button>
                     </div>
                   </td>
