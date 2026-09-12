@@ -26,6 +26,8 @@ export async function fetchUsers(params: {
   page: number;
   limit: number;
   search?: string;
+  sortBy?: string;
+  order?: "ASC" | "DESC";
 }): Promise<PaginatedUsers> {
   const { data } = await api.get<RawUsersResponse>("/users", { params });
   return normalizeUsersResponse(data);

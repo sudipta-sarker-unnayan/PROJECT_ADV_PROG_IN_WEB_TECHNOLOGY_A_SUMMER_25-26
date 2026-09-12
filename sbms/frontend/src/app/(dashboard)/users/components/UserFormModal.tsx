@@ -13,7 +13,7 @@ import { User } from "../../../../lib/types/user.types";
 
 const ROLES = ["super_admin", "manager", "employee", "client"] as const;
 
-type FormValues = CreateUserFormValues | UpdateUserFormValues;
+export type FormValues = CreateUserFormValues | UpdateUserFormValues;
 
 interface Props {
   mode: "create" | "edit";

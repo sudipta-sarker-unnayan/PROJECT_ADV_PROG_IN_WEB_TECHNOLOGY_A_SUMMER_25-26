@@ -15,7 +15,7 @@ import {
   CreateUserPayload,
   UpdateUserPayload,
 } from "../../../lib/types/user.types";
-import UserFormModal from "./components/UserFormModal";
+import UserFormModal, {FormValues} from "./components/UserFormModal";
 import ResetPasswordModal from "./components/ResetPasswordModal";
 
 const LIMIT = 10;
@@ -31,6 +31,8 @@ export default function UsersPage() {
   const [modalMode, setModalMode] = useState<"create" | "edit" | null>(null);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [resetTargetUser, setResetTargetUser] = useState<User | null>(null);
+  const [sortBy, setSortBy] = useState<string>("createdAt");
+  const [order, setOrder] = useState<"ASC" | "DESC">("ASC"); 
 
   const totalPages = Math.max(1, Math.ceil(total / LIMIT));
 
@@ -42,34 +44,42 @@ export default function UsersPage() {
         page,
         limit: LIMIT,
         search: search || undefined,
+        sortBy,
+        order,
       });
       setUsers(res.data);
       setTotal(res.total);
-    } catch (err: any) {
-      if (err?.isForbidden) {
-        setError("You do not have permission to view this page.");
-      } else {
-        setError("Failed to load users");
-      }
-    } finally {
+    } catch (err) {
+       const isForbidden =
+       typeof err === "object" &&
+       err !== null &&
+       "isForbidden" in err &&
+      (err as { isForbidden?: boolean }).isForbidden;
+
+    if (isForbidden) {
+      setError("You do not have permission to view this page.");
+    } else {
+      setError("Failed to load users");
+    }
+} finally {
       setIsLoading(false);
     }
-  }, [page, search]);
+  }, [page, search, sortBy, order]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     loadUsers();
   }, [loadUsers]);
 
-  async function handleCreateSubmit(values: CreateUserPayload) {
-    await createUser(values);
+  async function handleCreateSubmit(values: FormValues) {
+    await createUser(values as CreateUserPayload);
     setModalMode(null);
     loadUsers();
   }
 
-  async function handleEditSubmit(values: UpdateUserPayload) {
+  async function handleEditSubmit(values: FormValues) {
     if (!selectedUser) return;
-    await updateUser(selectedUser.id, values);
+    await updateUser(selectedUser.id, values as UpdateUserPayload);
     setModalMode(null);
     setSelectedUser(null);
     loadUsers();
@@ -95,6 +105,15 @@ export default function UsersPage() {
     await resetUserPassword(resetTargetUser.id, newPassword);
     setResetTargetUser(null);
     alert("Password reset successfully");
+  }
+
+  function handleSortClick(column: string) {           
+    if (sortBy === column) {
+      setOrder((o) => (o === "ASC" ? "DESC" : "ASC"));
+    } else {
+      setSortBy(column);
+      setOrder("ASC");
+    }
   }
 
   return (
@@ -128,8 +147,12 @@ export default function UsersPage() {
         <table className="table">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Email</th>
+             <th className="cursor-pointer select-none" onClick={() => handleSortClick("name")}>
+                Name {sortBy === "name" && (order === "ASC" ? "▲" : "▼")}
+             </th>
+             <th className="cursor-pointer select-none" onClick={() => handleSortClick("email")}>
+                Email {sortBy === "email" && (order === "ASC" ? "▲" : "▼")}
+              </th>
               <th>Role</th>
               <th>Status</th>
               <th className="text-right">Actions</th>
