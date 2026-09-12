@@ -47,7 +47,7 @@ export default function UsersPage() {
         limit: LIMIT,
         search: search || undefined,
         sortBy,
-        order,
+        sortOrder: order,
       });
       setUsers(res.data);
       setTotal(res.total);

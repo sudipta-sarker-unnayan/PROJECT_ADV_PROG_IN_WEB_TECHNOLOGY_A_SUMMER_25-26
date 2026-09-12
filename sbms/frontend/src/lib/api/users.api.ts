@@ -27,7 +27,7 @@ export async function fetchUsers(params: {
   limit: number;
   search?: string;
   sortBy?: string;
-  order?: "ASC" | "DESC";
+  sortOrder?: "ASC" | "DESC";
 }): Promise<PaginatedUsers> {
   const { data } = await api.get<RawUsersResponse>("/users", { params });
   return normalizeUsersResponse(data);
