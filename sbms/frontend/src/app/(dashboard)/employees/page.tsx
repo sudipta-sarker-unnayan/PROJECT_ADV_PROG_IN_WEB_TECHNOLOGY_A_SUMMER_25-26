@@ -23,7 +23,7 @@ export default function EmployeesPage() {
   const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [modalMode, setModalMode] = useState<"create" | "edit" | null>(null);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
     null,
@@ -73,15 +73,18 @@ export default function EmployeesPage() {
   }
 
   async function handleDelete(employee: Employee) {
-    if (
-      !confirm(
-        `Are you sure you want to delete ${employee.user.name}'s employee record?`,
-      )
-    )
-      return;
+  if (
+    !confirm(`Are you sure you want to delete ${employee.user.name}'s employee record?`)
+  )
+    return;
+  setDeletingId(employee.id);
+  try {
     await deleteEmployee(employee.id);
     loadEmployees();
+  } finally {
+    setDeletingId(null);
   }
+}
 
   return (
     <div className="p-6">
@@ -159,12 +162,17 @@ export default function EmployeesPage() {
                       >
                         Edit
                       </button>
-                      <button
-                        className="btn btn-xs btn-error"
-                        onClick={() => handleDelete(employee)}
-                      >
-                        Delete
-                      </button>
+                     <button
+                       className="btn btn-xs btn-error"
+                       disabled={deletingId === employee.id}
+                       onClick={() => handleDelete(employee)}
+                     >
+                       {deletingId === employee.id ? (
+                        <span className="loading loading-spinner loading-xs" />
+                      ) : (
+                        "Delete"
+                      )}
+                   </button>
                     </div>
                   </td>
                 </tr>

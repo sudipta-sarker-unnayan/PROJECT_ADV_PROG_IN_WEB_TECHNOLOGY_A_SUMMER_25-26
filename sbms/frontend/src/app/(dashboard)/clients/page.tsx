@@ -26,6 +26,7 @@ export default function ClientsPage() {
 
   const [modalMode, setModalMode] = useState<"create" | "edit" | null>(null);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const totalPages = Math.max(1, Math.ceil(total / LIMIT));
 
@@ -71,13 +72,16 @@ export default function ClientsPage() {
   }
 
   async function handleDelete(client: Client) {
-    if (
-      !confirm(`Are you sure you want to delete ${client.user.name}'s client record?`)
-    )
-      return;
+  if (!confirm(`Are you sure you want to delete ${client.user.name}'s client record?`))
+    return;
+  setDeletingId(client.id);
+  try {
     await deleteClient(client.id);
     loadClients();
+  } finally {
+    setDeletingId(null);
   }
+}
 
   return (
     <div className="p-6">
@@ -153,10 +157,15 @@ export default function ClientsPage() {
                       </button>
                       <button
                         className="btn btn-xs btn-error"
+                        disabled={deletingId === client.id}
                         onClick={() => handleDelete(client)}
                       >
-                        Delete
-                      </button>
+                        {deletingId === client.id ? (
+                          <span className="loading loading-spinner loading-xs" />
+                        ) : (
+                          "Delete"
+                        )}
+                    </button>
                     </div>
                   </td>
                 </tr>
