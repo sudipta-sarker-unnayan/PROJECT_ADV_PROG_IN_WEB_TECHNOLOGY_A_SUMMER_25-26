@@ -23,7 +23,7 @@ export default function DepartmentsPage() {
   const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [modalMode, setModalMode] = useState<"create" | "edit" | null>(null);
   const [selectedDepartment, setSelectedDepartment] =
     useState<Department | null>(null);
@@ -72,10 +72,14 @@ export default function DepartmentsPage() {
   }
 
   async function handleDelete(department: Department) {
-    if (!confirm(`Are you sure you want to delete ${department.name}?`))
-      return;
-    await deleteDepartment(department.id);
-    loadDepartments();
+    if (!confirm(`Are you sure you want to delete ${department.name}?`)) return;
+    setDeletingId(department.id);
+    try {
+      await deleteDepartment(department.id);
+      loadDepartments();
+    } finally {
+      setDeletingId(null);
+    }
   }
 
   return (
@@ -148,9 +152,15 @@ export default function DepartmentsPage() {
                       </button>
                       <button
                         className="btn btn-xs btn-error"
+                        disabled={deletingId === department.id}
                         onClick={() => handleDelete(department)}
                       >
-                        Delete
+                         {deletingId === department.id ? (
+                          <span className="loading loading-spinner loading-xs" />
+                         ) : (
+                           "Delete"
+                         )}
+                      </button>
                       </button>
                     </div>
                   </td>

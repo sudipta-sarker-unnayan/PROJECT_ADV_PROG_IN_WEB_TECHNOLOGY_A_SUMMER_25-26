@@ -27,6 +27,8 @@ export default function UsersPage() {
   const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
   const [modalMode, setModalMode] = useState<"create" | "edit" | null>(null);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -86,19 +88,29 @@ export default function UsersPage() {
   }
 
   async function handleToggleStatus(user: User) {
+  setTogglingId(user.id);
+  try {
     if (user.status === "active") {
       await deactivateUser(user.id);
     } else {
       await activateUser(user.id);
     }
     loadUsers();
+  } finally {
+    setTogglingId(null);
   }
+}
 
   async function handleDelete(user: User) {
-    if (!confirm(`Are you sure you want to delete ${user.name}?`)) return;
+  if (!confirm(`Are you sure you want to delete ${user.name}?`)) return;
+  setDeletingId(user.id);
+  try {
     await deleteUser(user.id);
     loadUsers();
+  } finally {
+    setDeletingId(null);
   }
+}
 
   async function handleResetPassword(newPassword: string) {
     if (!resetTargetUser) return;
@@ -201,9 +213,16 @@ export default function UsersPage() {
                       </button>
                       <button
                         className="btn btn-xs"
+                        disabled={togglingId === user.id}
                         onClick={() => handleToggleStatus(user)}
                       >
-                        {user.status === "active" ? "Deactivate" : "Activate"}
+                        {togglingId === user.id ? (
+                          <span className="loading loading-spinner loading-xs" />
+                        ) : user.status === "active" ? (
+                          "Deactivate"
+                        ) : (
+                          "Activate"
+                         )}
                       </button>
                       <button
                         className="btn btn-xs"
@@ -212,11 +231,16 @@ export default function UsersPage() {
                         Reset Password
                       </button>
                       <button
-                        className="btn btn-xs btn-error"
-                        onClick={() => handleDelete(user)}
-                      >
-                        Delete
-                      </button>
+                         className="btn btn-xs btn-error"
+                         disabled={deletingId === user.id}
+                         onClick={() => handleDelete(user)}
+                        >
+                         {deletingId === user.id ? (
+                          <span className="loading loading-spinner loading-xs" />
+                         ) : (
+                           "Delete"
+                           )}
+                         </button>
                     </div>
                   </td>
                 </tr>
