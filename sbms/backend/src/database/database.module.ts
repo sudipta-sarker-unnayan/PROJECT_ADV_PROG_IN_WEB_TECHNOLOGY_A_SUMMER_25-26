@@ -5,7 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal:true
+      isGlobal: true,
     }),
 
     TypeOrmModule.forRootAsync({

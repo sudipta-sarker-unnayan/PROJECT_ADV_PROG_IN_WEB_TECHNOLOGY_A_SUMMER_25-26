@@ -30,10 +30,10 @@ export class DepartmentsController {
     return this.departmentsService.create(dto);
   }
 
- @Get()
-findAll(@Query() query: PaginationQueryDto) {
-  return this.departmentsService.findAll(query);
-}
+  @Get()
+  findAll(@Query() query: PaginationQueryDto) {
+    return this.departmentsService.findAll(query);
+  }
 
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
@@ -41,7 +41,10 @@ findAll(@Query() query: PaginationQueryDto) {
   }
 
   @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateDepartmentDto) {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateDepartmentDto,
+  ) {
     return this.departmentsService.update(id, dto);
   }
 

@@ -1,4 +1,12 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Department } from '../../departments/entities/department.entity';
 import { Attendence } from 'src/attendence/entities/attendence.entity';
@@ -8,41 +16,41 @@ import { Task } from 'src/task/entities/task.entity';
 @Entity('employees')
 export class Employee {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
-  @OneToOne(() => User, { eager: true })
+  @OneToOne(() => User, { eager: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
-  user: User;
+  user!: User;
 
   @ManyToOne(() => Department, (department) => department.employees, {
     eager: true,
     nullable: true,
   })
   @JoinColumn({ name: 'department_id' })
-  department: Department;
-
+  department!: Department;
 
   @Column({ nullable: true })
-  designation: string;
+  designation!: string;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  salary: number;
+  salary!: number;
 
   @OneToMany(() => Attendence, (attendence) => attendence.employee)
-  attendence: Attendence[]
+  attendence!: Attendence[];
 
   @OneToMany(() => Leave, (leave) => leave.employee)
-  leaves: Leave[];
+  leaves!: Leave[];
 
   @OneToMany(() => Task, (task) => task.employee)
-  task: Task[]
+  task!: Task[];
 
   @ManyToOne(() => Employee, (employee) => employee.subordinates, {
     nullable: true,
+    onDelete: 'SET NULL',
   })
   @JoinColumn({ name: 'manager_id' })
-  manager: Employee;
+  manager!: Employee;
 
   @OneToMany(() => Employee, (employee) => employee.manager)
-  subordinates: Employee[];
+  subordinates!: Employee[];
 }

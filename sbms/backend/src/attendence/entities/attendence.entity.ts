@@ -1,48 +1,54 @@
-import { Employee } from "src/employees/entities/employee.entity";
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Employee } from 'src/employees/entities/employee.entity';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 export enum AttendenceStatus {
-    PRESENT = 'present',
-    ABSENT = 'absent',
-    LATE = 'late',
+  PRESENT = 'present',
+  ABSENT = 'absent',
+  LATE = 'late',
 }
 
 @Entity('attendence')
 export class Attendence {
-    @PrimaryGeneratedColumn()
-    id: number
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @Column({
-        type: 'date'
-    })
-    date: Date
+  @Column({
+    type: 'date',
+  })
+  date: Date;
 
-    @Column({
-        type: 'time',
-        nullable: false
-    })
-    checkIn: string
+  @Column({
+    type: 'time',
+    nullable: false,
+  })
+  checkIn: string;
 
-    @Column({
-        type: 'time',
-        nullable: true
-    })
-    checkOut: string
+  @Column({
+    type: 'time',
+    nullable: true,
+  })
+  checkOut: string;
 
-    @Column({
-        type: 'enum',
-        enum: AttendenceStatus,
-        default: AttendenceStatus.ABSENT,
-    })
-    status: AttendenceStatus
+  @Column({
+    type: 'enum',
+    enum: AttendenceStatus,
+    default: AttendenceStatus.ABSENT,
+  })
+  status: AttendenceStatus;
 
-    @CreateDateColumn()
-    createAt: Date
+  @CreateDateColumn()
+  createAt: Date;
 
-    @ManyToOne(() => Employee, (employee) => employee.attendence, {
-        onDelete: 'CASCADE'
-    })
-    @JoinColumn({ name: 'employeeId' })
-    employee: Employee
-    
+  @ManyToOne(() => Employee, (employee) => employee.attendence, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'employeeId' })
+  employee: Employee;
 }

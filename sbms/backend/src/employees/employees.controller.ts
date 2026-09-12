@@ -20,7 +20,6 @@ import { RoleName } from '../roles/entities/role.entity';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 
-
 interface CurrentUserPayload {
   userId: number;
   email: string;
@@ -28,7 +27,7 @@ interface CurrentUserPayload {
 }
 
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(RoleName.SUPER_ADMIN,RoleName.MANAGER)
+@Roles(RoleName.SUPER_ADMIN, RoleName.MANAGER)
 @Controller('employees')
 export class EmployeesController {
   constructor(private readonly employeesService: EmployeesService) {}
@@ -59,7 +58,10 @@ export class EmployeesController {
 
   @Patch(':id')
   @Roles(RoleName.SUPER_ADMIN)
-  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateEmployeeDto) {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateEmployeeDto,
+  ) {
     return this.employeesService.update(id, dto);
   }
 

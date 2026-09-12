@@ -6,7 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ILike, Repository } from 'typeorm';
+import { ILike, QueryFailedError, Repository } from 'typeorm';
 import { Client } from './entities/client.entity';
 import { User } from '../users/entities/user.entity';
 import { CreateClientDto } from './dto/create-client.dto';
@@ -97,9 +97,18 @@ export class ClientsService {
   }
 
   async remove(id: number): Promise<void> {
-    const client = await this.findClientOrFail(id);
+  const client = await this.findClientOrFail(id);
+  try {
     await this.clientsRepo.remove(client);
+  } catch (err) {
+    if (err instanceof QueryFailedError && (err as QueryFailedError & { code?: string }).code === '23503') {
+      throw new ConflictException(
+        'Cannot delete this client: tasks are still linked to their account. Reassign or remove those first.',
+      );
+    }
+    throw err;
   }
+}
 
   private async findClientOrFail(id: number): Promise<Client> {
     const client = await this.clientsRepo.findOne({ where: { id } });
