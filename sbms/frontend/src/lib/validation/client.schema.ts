@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const createClientSchema = z.object({
-  userId: z.coerce.number({ required_error: "Please select a user" }).int(),
+  userId: z.coerce.number({ error: "Please select a user" }).int(),
   companyName: z.string().optional(),
   phone: z.string().optional(),
 });

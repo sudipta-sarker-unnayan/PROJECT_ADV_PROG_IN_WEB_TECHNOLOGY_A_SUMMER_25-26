@@ -1,5 +1,5 @@
 "use client";
-
+import axios from "axios";
 import { useEffect, useState, useCallback } from "react";
 import {
   fetchClients,
@@ -12,8 +12,7 @@ import {
   CreateClientPayload,
   UpdateClientPayload,
 } from "../../../lib/types/client.types";
-import ClientFormModal from "./components/ClientFormModal";
-
+import ClientFormModal, { FormValues } from "./components/ClientFormModal";
 const LIMIT = 10;
 
 export default function ClientsPage() {
@@ -26,7 +25,7 @@ export default function ClientsPage() {
 
   const [modalMode, setModalMode] = useState<"create" | "edit" | null>(null);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const totalPages = Math.max(1, Math.ceil(total / LIMIT));
 
@@ -41,12 +40,18 @@ export default function ClientsPage() {
       });
       setClients(res.data);
       setTotal(res.total);
-    } catch (err: any) {
-      if (err?.isForbidden) {
-        setError("You do not have permission to view this page.");
+    } catch (err) {
+      const isForbidden =
+       typeof err === "object" &&
+       err !== null &&
+       "isForbidden" in err &&
+      (err as { isForbidden?: boolean }).isForbidden;
+
+      if (isForbidden) {
+       setError("You do not have permission to view this page.");
       } else {
-        setError("Failed to load clients");
-      }
+      setError("Failed to load clients");
+     }
     } finally {
       setIsLoading(false);
     }
@@ -57,15 +62,15 @@ export default function ClientsPage() {
     loadClients();
   }, [loadClients]);
 
-  async function handleCreateSubmit(values: CreateClientPayload) {
-    await createClient(values);
+  async function handleCreateSubmit(values: FormValues) {
+    await createClient(values as CreateClientPayload);
     setModalMode(null);
     loadClients();
   }
 
-  async function handleEditSubmit(values: UpdateClientPayload) {
+  async function handleEditSubmit(values: FormValues) {
     if (!selectedClient) return;
-    await updateClient(selectedClient.id, values);
+    await updateClient(selectedClient.id, values as UpdateClientPayload);
     setModalMode(null);
     setSelectedClient(null);
     loadClients();
@@ -78,6 +83,11 @@ export default function ClientsPage() {
   try {
     await deleteClient(client.id);
     loadClients();
+  } catch (err) {
+    const message = axios.isAxiosError(err)
+      ? (err.response?.data as { message?: string } | undefined)?.message
+      : undefined;
+    setError(message ?? "Failed to delete client.");
   } finally {
     setDeletingId(null);
   }

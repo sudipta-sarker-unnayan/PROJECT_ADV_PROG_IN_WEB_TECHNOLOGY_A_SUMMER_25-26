@@ -18,7 +18,7 @@ import {
 } from "../../../../lib/api/employees.api";
 import { fetchDepartments } from "../../../../lib/api/departments.api";
 
-type FormValues = CreateEmployeeFormValues | UpdateEmployeeFormValues;
+export type FormValues = CreateEmployeeFormValues | UpdateEmployeeFormValues;
 
 interface Props {
   mode: "create" | "edit";

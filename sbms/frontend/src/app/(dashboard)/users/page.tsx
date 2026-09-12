@@ -1,5 +1,5 @@
 "use client";
-
+import axios from "axios";
 import { useEffect, useState, useCallback } from "react";
 import {
   fetchUsers,
@@ -27,8 +27,8 @@ export default function UsersPage() {
   const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [togglingId, setTogglingId] = useState<number | null>(null);
 
   const [modalMode, setModalMode] = useState<"create" | "edit" | null>(null);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -96,17 +96,27 @@ export default function UsersPage() {
       await activateUser(user.id);
     }
     loadUsers();
+  } catch (err) {
+    const message = axios.isAxiosError(err)
+      ? (err.response?.data as { message?: string } | undefined)?.message
+      : undefined;
+    setError(message ?? "Failed to update user status.");
   } finally {
     setTogglingId(null);
   }
 }
 
-  async function handleDelete(user: User) {
+async function handleDelete(user: User) {
   if (!confirm(`Are you sure you want to delete ${user.name}?`)) return;
   setDeletingId(user.id);
   try {
     await deleteUser(user.id);
     loadUsers();
+  } catch (err) {
+    const message = axios.isAxiosError(err)
+      ? (err.response?.data as { message?: string } | undefined)?.message
+      : undefined;
+    setError(message ?? "Failed to delete user.");
   } finally {
     setDeletingId(null);
   }

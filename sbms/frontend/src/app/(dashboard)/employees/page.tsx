@@ -1,5 +1,5 @@
 "use client";
-
+import axios from "axios";
 import { useEffect, useState, useCallback } from "react";
 import {
   fetchEmployees,
@@ -12,7 +12,7 @@ import {
   CreateEmployeePayload,
   UpdateEmployeePayload,
 } from "../../../lib/types/employee.types";
-import EmployeeFormModal from "./components/EmployeeFormModal";
+import EmployeeFormModal, { FormValues } from "./components/EmployeeFormModal";
 
 const LIMIT = 10;
 
@@ -23,7 +23,7 @@ export default function EmployeesPage() {
   const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
   const [modalMode, setModalMode] = useState<"create" | "edit" | null>(null);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
     null,
@@ -42,13 +42,19 @@ export default function EmployeesPage() {
       });
       setEmployees(res.data);
       setTotal(res.total);
-    } catch (err: any) {
-      if (err?.isForbidden) {
-        setError("You do not have permission to view this page.");
-      } else {
-        setError("Failed to load employees");
-      }
-    } finally {
+    } catch (err) {
+  const isForbidden =
+    typeof err === "object" &&
+    err !== null &&
+    "isForbidden" in err &&
+    (err as { isForbidden?: boolean }).isForbidden;
+
+  if (isForbidden) {
+    setError("You do not have permission to view this page.");
+  } else {
+    setError("Failed to load employees");
+  }
+} finally {
       setIsLoading(false);
     }
   }, [page, search]);
@@ -58,15 +64,15 @@ export default function EmployeesPage() {
     loadEmployees();
   }, [loadEmployees]);
 
-  async function handleCreateSubmit(values: CreateEmployeePayload) {
-    await createEmployee(values);
+  async function handleCreateSubmit(values: FormValues) {
+    await createEmployee(values as CreateEmployeePayload);
     setModalMode(null);
     loadEmployees();
   }
 
-  async function handleEditSubmit(values: UpdateEmployeePayload) {
+  async function handleEditSubmit(values: FormValues) {
     if (!selectedEmployee) return;
-    await updateEmployee(selectedEmployee.id, values);
+    await updateEmployee(selectedEmployee.id, values as UpdateEmployeePayload);
     setModalMode(null);
     setSelectedEmployee(null);
     loadEmployees();
@@ -81,6 +87,11 @@ export default function EmployeesPage() {
   try {
     await deleteEmployee(employee.id);
     loadEmployees();
+  } catch (err) {
+    const message = axios.isAxiosError(err)
+      ? (err.response?.data as { message?: string } | undefined)?.message
+      : undefined;
+    setError(message ?? "Failed to delete employee.");
   } finally {
     setDeletingId(null);
   }
