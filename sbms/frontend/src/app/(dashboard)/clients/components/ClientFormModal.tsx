@@ -13,7 +13,7 @@ import { Client } from "../../../../lib/types/client.types";
 import { User } from "../../../../lib/types/user.types";
 import { fetchEligibleUsersForClient } from "../../../../lib/api/clients.api";
 
-type FormValues = CreateClientFormValues | UpdateClientFormValues;
+export type FormValues = CreateClientFormValues | UpdateClientFormValues;
 
 interface Props {
   mode: "create" | "edit";
