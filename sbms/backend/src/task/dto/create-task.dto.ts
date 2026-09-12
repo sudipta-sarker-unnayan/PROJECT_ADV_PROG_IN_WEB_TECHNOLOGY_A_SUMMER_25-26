@@ -1,4 +1,13 @@
-import { IsDateString, IsEnum, IsInt, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
+import {
+  IsDateString,
+  IsEnum,
+  IsInt,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+} from 'class-validator';
 
 import { TaskPriority, TaskStatus } from '../entities/task.entity';
 import { Type } from 'class-transformer';

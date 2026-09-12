@@ -26,11 +26,16 @@ export class ClientsService {
     const user = await this.usersRepo.findOne({ where: { id: dto.userId } });
     if (!user) throw new NotFoundException(`User #${dto.userId} not found`);
     if (user.role.name !== RoleName.CLIENT) {
-      throw new BadRequestException(`User #${dto.userId} does not have the client role`);
+      throw new BadRequestException(
+        `User #${dto.userId} does not have the client role`,
+      );
     }
 
-    const existing = await this.clientsRepo.findOne({ where: { user: { id: dto.userId } } });
-    if (existing) throw new ConflictException(`User #${dto.userId} is already a client`);
+    const existing = await this.clientsRepo.findOne({
+      where: { user: { id: dto.userId } },
+    });
+    if (existing)
+      throw new ConflictException(`User #${dto.userId} is already a client`);
 
     const client = this.clientsRepo.create({
       user,

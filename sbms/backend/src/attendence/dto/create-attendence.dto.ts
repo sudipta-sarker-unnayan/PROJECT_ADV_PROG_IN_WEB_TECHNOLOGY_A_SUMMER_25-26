@@ -1,21 +1,27 @@
-import { IsDateString, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator"
-import { AttendenceStatus } from "../entities/attendence.entity"
+import {
+  IsDateString,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
+import { AttendenceStatus } from '../entities/attendence.entity';
 
 export class CreateAttendenceDto {
-    @IsDateString()
-    date:Date
+  @IsDateString()
+  date: Date;
 
-    @IsString()
-    @IsNotEmpty()
-    checkIn:string
+  @IsString()
+  @IsNotEmpty()
+  checkIn: string;
 
-    @IsOptional()
-    @IsString()
-    checkOut:string
+  @IsOptional()
+  @IsString()
+  checkOut: string;
 
-    @IsOptional()
-    status?:AttendenceStatus
+  @IsOptional()
+  status?: AttendenceStatus;
 
-    @IsNumber()
-    employeeId:number
+  @IsNumber()
+  employeeId: number;
 }

@@ -1,4 +1,8 @@
-import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -10,150 +14,159 @@ import { EmployeesService } from 'src/employees/employees.service';
 import { ClientsService } from 'src/clients/clients.service';
 import { UploadedFileInfo } from 'src/common/interfaces/uploaded-file.interface';
 import { RoleName } from 'src/roles/entities/role.entity';
-import {CurrentUserPayload} from 'src/task/task.controller'
+import { CurrentUserPayload } from 'src/task/task.controller';
 
 @Injectable()
 export class TaskService {
   constructor(
     @InjectRepository(Task) private readonly taskRepo: Repository<Task>,
-    @InjectRepository(Employee) private readonly employeeRepo: Repository<Employee>,
+    @InjectRepository(Employee)
+    private readonly employeeRepo: Repository<Employee>,
     private readonly employeesService: EmployeesService,
     private readonly clientsService: ClientsService,
-  ) { }
+  ) {}
 
-  async getAll():Promise<Task[]> {
+  async getAll(): Promise<Task[]> {
     const task = await this.taskRepo.find({
       relations: {
-        employee: true
+        employee: true,
       },
       order: {
-        deadline: 'ASC'
-      }
-    })
-    return task
+        deadline: 'ASC',
+      },
+    });
+    return task;
   }
 
-  async getTaskById(id: number):Promise<Task> {
+  async getTaskById(id: number): Promise<Task> {
     const task = await this.taskRepo.findOne({
       where: {
-        id: id
+        id: id,
       },
       relations: {
-        employee: true
-      }
-    })
+        employee: true,
+      },
+    });
 
     if (!task) {
       throw new BadRequestException('Task not found');
     }
 
-    return task
+    return task;
   }
 
-  async getTaskByEmployee(employeeId: number):Promise<Task[]> {
+  async getTaskByEmployee(employeeId: number): Promise<Task[]> {
     const task = await this.taskRepo.find({
       where: {
         employee: {
-          id: employeeId
-        }
+          id: employeeId,
+        },
       },
       relations: {
-        employee: true
+        employee: true,
       },
       order: {
-        deadline: 'ASC'
-      }
-    })
+        deadline: 'ASC',
+      },
+    });
 
     if (task.length === 0) {
       throw new BadRequestException('No tasks found for this employee');
     }
 
-    return task
+    return task;
   }
 
-  async getMyTasksAsEmployee(userId:number):Promise<Task[]>{
-    const emp = await this.employeesService.findByUserId(userId)
+  async getMyTasksAsEmployee(userId: number): Promise<Task[]> {
+    const emp = await this.employeesService.findByUserId(userId);
     return this.taskRepo.find({
-      where:{
-        employee:{id:emp.id}
+      where: {
+        employee: { id: emp.id },
       },
-      relations:{
-        employee:true,client:true
+      relations: {
+        employee: true,
+        client: true,
       },
-      order:{
-        deadline:'ASC'
-      }
-    })
+      order: {
+        deadline: 'ASC',
+      },
+    });
   }
 
-  async getMyTasksAsClient(userId:number):Promise<Task[]>{
-    const client = await this.clientsService.findByUserId(userId)
+  async getMyTasksAsClient(userId: number): Promise<Task[]> {
+    const client = await this.clientsService.findByUserId(userId);
     return this.taskRepo.find({
-      where:{
-        client:{id:client.id}
+      where: {
+        client: { id: client.id },
       },
-      relations:{
-        employee:true,client:true
+      relations: {
+        employee: true,
+        client: true,
       },
-      order:{
-        deadline:'ASC'
-      }
-    })
+      order: {
+        deadline: 'ASC',
+      },
+    });
   }
 
-  async createTask(createTaskDto: CreateTaskDto):Promise<Task> {
+  async createTask(createTaskDto: CreateTaskDto): Promise<Task> {
     const emp = await this.employeeRepo.findOne({
       where: {
-        id: createTaskDto.employeeId
-      }
-    })
+        id: createTaskDto.employeeId,
+      },
+    });
 
     if (!emp) {
-      throw new BadRequestException("Employee not found")
+      throw new BadRequestException('Employee not found');
     }
 
     const task = this.taskRepo.create({
       ...createTaskDto,
-      employee: emp
-    })
+      employee: emp,
+    });
 
-    return await this.taskRepo.save(task)
+    return await this.taskRepo.save(task);
   }
 
-  async updateTask(id: number, updateTaskDto: UpdateTaskDto):Promise<Task> {
-    const task = await this.getTaskById(id)
+  async updateTask(id: number, updateTaskDto: UpdateTaskDto): Promise<Task> {
+    const task = await this.getTaskById(id);
 
     if (updateTaskDto.employeeId) {
       const employee = await this.employeeRepo.findOne({
         where: {
           id: updateTaskDto.employeeId,
-        }
-      })
+        },
+      });
 
       if (!employee) {
-        throw new BadRequestException("Employee not found")
+        throw new BadRequestException('Employee not found');
       }
 
-      task.employee = employee
+      task.employee = employee;
     }
 
-    Object.assign(task, { ...updateTaskDto })
+    Object.assign(task, { ...updateTaskDto });
 
-    return await this.taskRepo.save(task)
+    return await this.taskRepo.save(task);
   }
 
-  async updateProgress(id: number, updateProgressDto: UpdateProgressDto):Promise<Task> {
-    const task = await this.getTaskById(id)
-    task.progress = updateProgressDto.progress
-    task.status = updateProgressDto.status
+  async updateProgress(
+    id: number,
+    updateProgressDto: UpdateProgressDto,
+  ): Promise<Task> {
+    const task = await this.getTaskById(id);
+    task.progress = updateProgressDto.progress;
+    task.status = updateProgressDto.status;
 
-    return await this.taskRepo.save(task)
+    return await this.taskRepo.save(task);
   }
 
-    async uploadCompletedFile(id: number,file: UploadedFileInfo | undefined,currentUser: CurrentUserPayload): Promise<Task> {
-    
-      if (!file) {
+  async uploadCompletedFile(
+    id: number,
+    file: UploadedFileInfo | undefined,
+    currentUser: CurrentUserPayload,
+  ): Promise<Task> {
+    if (!file) {
       throw new BadRequestException('A file is required');
     }
 
@@ -168,14 +181,17 @@ export class TaskService {
     return await this.taskRepo.save(task);
   }
 
-  async deleteTask(id: number):Promise<string> {
-    const task = await this.getTaskById(id)
+  async deleteTask(id: number): Promise<string> {
+    const task = await this.getTaskById(id);
     this.taskRepo.remove(task);
 
-    return `Task with ID ${id} deleted successfully`
+    return `Task with ID ${id} deleted successfully`;
   }
 
-  async assertCanView(task: Task, currentUser: CurrentUserPayload): Promise<void> {
+  async assertCanView(
+    task: Task,
+    currentUser: CurrentUserPayload,
+  ): Promise<void> {
     if (
       currentUser.role === RoleName.SUPER_ADMIN ||
       currentUser.role === RoleName.MANAGER
@@ -184,7 +200,9 @@ export class TaskService {
     }
 
     if (currentUser.role === RoleName.EMPLOYEE) {
-      const employee = await this.employeesService.findByUserId(currentUser.userId);
+      const employee = await this.employeesService.findByUserId(
+        currentUser.userId,
+      );
       if (task.employee?.id !== employee.id) {
         throw new ForbiddenException('You can only view your own tasks');
       }
@@ -202,10 +220,15 @@ export class TaskService {
     throw new ForbiddenException('Not authorized to view this task');
   }
 
-  private async assertEmployeeOwnsTaskIfEmployee(task: Task,currentUser: CurrentUserPayload): Promise<void> {
+  private async assertEmployeeOwnsTaskIfEmployee(
+    task: Task,
+    currentUser: CurrentUserPayload,
+  ): Promise<void> {
     if (currentUser.role !== RoleName.EMPLOYEE) return;
 
-    const employee = await this.employeesService.findByUserId(currentUser.userId);
+    const employee = await this.employeesService.findByUserId(
+      currentUser.userId,
+    );
     if (task.employee?.id !== employee.id) {
       throw new ForbiddenException('You can only act on tasks assigned to you');
     }

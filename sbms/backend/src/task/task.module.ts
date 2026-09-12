@@ -8,7 +8,11 @@ import { EmployeesModule } from 'src/employees/employees.module';
 import { ClientsModule } from 'src/clients/clients.module';
 
 @Module({
-  imports:[TypeOrmModule.forFeature([Task,Employee]),EmployeesModule,ClientsModule],
+  imports: [
+    TypeOrmModule.forFeature([Task, Employee]),
+    EmployeesModule,
+    ClientsModule,
+  ],
   controllers: [TaskController],
   providers: [TaskService],
 })

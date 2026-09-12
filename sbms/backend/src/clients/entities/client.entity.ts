@@ -12,18 +12,18 @@ import { Task } from 'src/task/entities/task.entity';
 @Entity('clients')
 export class Client {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
-  @OneToOne(() => User, { eager: true })
+  @OneToOne(() => User, { eager: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
-  user: User;
+  user!: User;
 
   @Column({ name: 'company_name', nullable: true })
-  companyName: string;
+  companyName!: string;
 
   @Column({ nullable: true })
-  phone: string;
+  phone!: string;
 
   @OneToMany(() => Task, (task) => task.client)
-  tasks: Task[];
+  tasks!: Task[];
 }

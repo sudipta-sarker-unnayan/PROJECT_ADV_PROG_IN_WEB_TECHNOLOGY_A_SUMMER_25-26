@@ -1,6 +1,11 @@
-import {BadRequestException,ConflictException,Injectable,NotFoundException} from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ILike, Repository } from 'typeorm';
+import { ILike, QueryFailedError, Repository } from 'typeorm';
 import { Employee } from './entities/employee.entity';
 import { User } from '../users/entities/user.entity';
 import { Department } from '../departments/entities/department.entity';
@@ -11,11 +16,14 @@ import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 @Injectable()
 export class EmployeesService {
   constructor(
-    @InjectRepository(Employee) private readonly employeesRepo: Repository<Employee>,
+    @InjectRepository(Employee)
+    private readonly employeesRepo: Repository<Employee>,
     @InjectRepository(User) private readonly usersRepo: Repository<User>,
-    @InjectRepository(Department) private readonly departmentsRepo: Repository<Department>,
-    @InjectRepository(Employee) private readonly managerRepo: Repository<Employee>,
-  ) { }
+    @InjectRepository(Department)
+    private readonly departmentsRepo: Repository<Department>,
+    @InjectRepository(Employee)
+    private readonly managerRepo: Repository<Employee>,
+  ) {}
 
   async create(dto: CreateEmployeeDto): Promise<Employee> {
     const user = await this.usersRepo.findOne({ where: { id: dto.userId } });
@@ -30,10 +38,17 @@ export class EmployeesService {
       );
     }
 
-    const existing = await this.employeesRepo.findOne({ where: { user: { id: dto.userId } } });
-    if (existing) throw new ConflictException(`User #${dto.userId} is already an employee`);
+    const existing = await this.employeesRepo.findOne({
+      where: { user: { id: dto.userId } },
+    });
+    if (existing)
+      throw new ConflictException(`User #${dto.userId} is already an employee`);
 
-    const employee = this.employeesRepo.create({ user, designation: dto.designation, salary: dto.salary });
+    const employee = this.employeesRepo.create({
+      user,
+      designation: dto.designation,
+      salary: dto.salary,
+    });
 
     if (dto.departmentId) {
       employee.department = await this.findDepartmentOrFail(dto.departmentId);
@@ -75,7 +90,9 @@ export class EmployeesService {
     }
     if (dto.managerId !== undefined) {
       if (dto.managerId === id) {
-        throw new BadRequestException('An employee cannot be their own manager');
+        throw new BadRequestException(
+          'An employee cannot be their own manager',
+        );
       }
       employee.manager = await this.findManagerOrFail(dto.managerId);
     }
@@ -90,7 +107,19 @@ export class EmployeesService {
 
   async remove(id: number): Promise<void> {
     const employee = await this.findEmployeeOrFail(id);
-    await this.employeesRepo.remove(employee);
+    try {
+      await this.employeesRepo.remove(employee);
+    } catch (err) {
+      if (
+        err instanceof QueryFailedError &&
+        (err as QueryFailedError & { code?: string }).code === '23503'
+      ) {
+        throw new ConflictException(
+          'Cannot delete this employee: attendance, leave, or task records are still linked. Reassign or remove those first.',
+        );
+      }
+      throw err;
+    }
   }
 
   async findByUserId(userId: number): Promise<Employee> {

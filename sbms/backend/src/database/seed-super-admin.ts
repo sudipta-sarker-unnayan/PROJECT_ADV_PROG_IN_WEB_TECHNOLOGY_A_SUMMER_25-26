@@ -27,7 +27,9 @@ async function run() {
       password,
       role: RoleName.SUPER_ADMIN,
     });
-    console.log(`Super admin created -> email: ${email}  password: ${password}`);
+    console.log(
+      `Super admin created -> email: ${email}  password: ${password}`,
+    );
   }
 
   await app.close();

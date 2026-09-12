@@ -6,7 +6,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ILike, Repository } from 'typeorm';
+import { ILike, QueryFailedError, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User, UserStatus } from './entities/user.entity';
 import { Role } from '../roles/entities/role.entity';
@@ -16,7 +16,7 @@ import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 
 @Injectable()
 export class UsersService {
-private readonly logger = new Logger(UsersService.name);
+  private readonly logger = new Logger(UsersService.name);
   constructor(
     @InjectRepository(User) private readonly usersRepo: Repository<User>,
     @InjectRepository(Role) private readonly rolesRepo: Repository<Role>,
@@ -32,7 +32,9 @@ private readonly logger = new Logger(UsersService.name);
 
     const role = await this.rolesRepo.findOne({ where: { name: dto.role } });
     if (!role) {
-      throw new NotFoundException(`Role '${dto.role}' not found — seed roles first`);
+      throw new NotFoundException(
+        `Role '${dto.role}' not found — seed roles first`,
+      );
     }
 
     const passwordHash = await bcrypt.hash(dto.password, 10);
@@ -48,37 +50,36 @@ private readonly logger = new Logger(UsersService.name);
   }
 
   async findAll(query: PaginationQueryDto): Promise<[User[], number]> {
-  const {
-    page = 1,
-    limit = 10,
-    sortBy = 'id',
-    sortOrder = 'ASC',
-    search,
-    role,
-  } = query;
+    const {
+      page = 1,
+      limit = 10,
+      sortBy = 'id',
+      sortOrder = 'ASC',
+      search,
+      role,
+    } = query;
 
-  const baseWhere: Record<string, any> = {};
-  if (role) {
-    baseWhere.role = { name: role };
+    const baseWhere: Record<string, any> = {};
+    if (role) {
+      baseWhere.role = { name: role };
+    }
+
+    const where = search
+      ? [
+          { ...baseWhere, name: ILike(`%${search}%`) },
+          { ...baseWhere, email: ILike(`%${search}%`) },
+        ]
+      : baseWhere;
+
+    return this.usersRepo.findAndCount({
+      where,
+      order: {
+        [sortBy]: sortOrder,
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
   }
-
-  const where = search
-    ? [
-        { ...baseWhere, name: ILike(`%${search}%`) },
-        { ...baseWhere, email: ILike(`%${search}%`) },
-      ]
-    : baseWhere;
-
-  return this.usersRepo.findAndCount({
-    where,
-    order: {
-      [sortBy]: sortOrder,
-    },
-    skip: (page - 1) * limit,
-    take: limit,
-  });
-}
-
 
   async findOne(id: number): Promise<User> {
     const user = await this.usersRepo.findOne({ where: { id } });
@@ -106,7 +107,19 @@ private readonly logger = new Logger(UsersService.name);
 
   async remove(id: number): Promise<void> {
     const user = await this.findOne(id);
-    await this.usersRepo.remove(user);
+    try {
+      await this.usersRepo.remove(user);
+    } catch (err) {
+      if (
+        err instanceof QueryFailedError &&
+        (err as QueryFailedError & { code?: string }).code === '23503'
+      ) {
+        throw new ConflictException(
+          'Cannot delete this user: an employee or client profile is still linked. Delete that profile first.',
+        );
+      }
+      throw err;
+    }
   }
 
   async setStatus(id: number, status: UserStatus): Promise<User> {
@@ -135,7 +148,11 @@ private readonly logger = new Logger(UsersService.name);
     user.passwordHash = await bcrypt.hash(newPassword, 10);
     await this.usersRepo.save(user);
   }
-    async setResetToken(email: string, token: string, expiry: Date): Promise<User | null> {
+  async setResetToken(
+    email: string,
+    token: string,
+    expiry: Date,
+  ): Promise<User | null> {
     const user = await this.findByEmail(email);
     if (!user) return null;
     user.resetToken = token;
@@ -158,4 +175,3 @@ private readonly logger = new Logger(UsersService.name);
     await this.usersRepo.save(user);
   }
 }
-

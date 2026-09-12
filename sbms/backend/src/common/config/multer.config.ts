@@ -3,8 +3,7 @@ import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { UploadedFileInfo } from '../interfaces/uploaded-file.interface';
 
-const ALLOWED_EXTENSIONS =
-  /\.(pdf|docx?|xlsx?|pptx?|png|jpe?g|zip|txt|csv)$/i;
+const ALLOWED_EXTENSIONS = /\.(pdf|docx?|xlsx?|pptx?|png|jpe?g|zip|txt|csv)$/i;
 
 function buildUploadOptions(subfolder: string) {
   return {
