@@ -13,11 +13,15 @@ import {
   UpdateEmployeePayload,
 } from "../../../lib/types/employee.types";
 import EmployeeFormModal, { FormValues } from "./components/EmployeeFormModal";
+import { useAuth } from "../../../lib/auth/AuthContext";
+import { RoleName } from "@/src/lib/types/auth.types";
 
 const LIMIT = 10;
 
 export default function EmployeesPage() {
   const [employees, setEmployees] = useState<Employee[]>([]);
+  const { user } = useAuth();
+  const canManage = user?.role === RoleName.SUPER_ADMIN;
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -43,18 +47,18 @@ export default function EmployeesPage() {
       setEmployees(res.data);
       setTotal(res.total);
     } catch (err) {
-  const isForbidden =
-    typeof err === "object" &&
-    err !== null &&
-    "isForbidden" in err &&
-    (err as { isForbidden?: boolean }).isForbidden;
+      const isForbidden =
+        typeof err === "object" &&
+        err !== null &&
+        "isForbidden" in err &&
+        (err as { isForbidden?: boolean }).isForbidden;
 
-  if (isForbidden) {
-    setError("You do not have permission to view this page.");
-  } else {
-    setError("Failed to load employees");
-  }
-} finally {
+      if (isForbidden) {
+        setError("You do not have permission to view this page.");
+      } else {
+        setError("Failed to load employees");
+      }
+    } finally {
       setIsLoading(false);
     }
   }, [page, search]);
@@ -79,34 +83,36 @@ export default function EmployeesPage() {
   }
 
   async function handleDelete(employee: Employee) {
-  if (
-    !confirm(`Are you sure you want to delete ${employee.user.name}'s employee record?`)
-  )
-    return;
-  setDeletingId(employee.id);
-  try {
-    await deleteEmployee(employee.id);
-    loadEmployees();
-  } catch (err) {
-    const message = axios.isAxiosError(err)
-      ? (err.response?.data as { message?: string } | undefined)?.message
-      : undefined;
-    setError(message ?? "Failed to delete employee.");
-  } finally {
-    setDeletingId(null);
+    if (
+      !confirm(`Are you sure you want to delete ${employee.user.name}'s employee record?`)
+    )
+      return;
+    setDeletingId(employee.id);
+    try {
+      await deleteEmployee(employee.id);
+      loadEmployees();
+    } catch (err) {
+      const message = axios.isAxiosError(err)
+        ? (err.response?.data as { message?: string } | undefined)?.message
+        : undefined;
+      setError(message ?? "Failed to delete employee.");
+    } finally {
+      setDeletingId(null);
+    }
   }
-}
 
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Employee Management</h1>
-        <button
-          className="btn btn-primary"
-          onClick={() => setModalMode("create")}
-        >
-          + New Employee
-        </button>
+        {canManage && (
+          <button
+            className="btn btn-primary"
+            onClick={() => setModalMode("create")}
+          >
+            + New Employee
+          </button>
+        )}
       </div>
 
       <div className="mb-4">
@@ -173,17 +179,17 @@ export default function EmployeesPage() {
                       >
                         Edit
                       </button>
-                     <button
-                       className="btn btn-xs btn-error"
-                       disabled={deletingId === employee.id}
-                       onClick={() => handleDelete(employee)}
-                     >
-                       {deletingId === employee.id ? (
-                        <span className="loading loading-spinner loading-xs" />
-                      ) : (
-                        "Delete"
-                      )}
-                   </button>
+                      <button
+                        className="btn btn-xs btn-error"
+                        disabled={deletingId === employee.id}
+                        onClick={() => handleDelete(employee)}
+                      >
+                        {deletingId === employee.id ? (
+                          <span className="loading loading-spinner loading-xs" />
+                        ) : (
+                          "Delete"
+                        )}
+                      </button>
                     </div>
                   </td>
                 </tr>

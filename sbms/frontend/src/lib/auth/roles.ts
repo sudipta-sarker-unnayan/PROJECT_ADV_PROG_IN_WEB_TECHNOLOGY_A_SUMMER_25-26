@@ -8,8 +8,11 @@ import { RoleName } from "../types/auth.types";
 export const ROUTE_ROLE_MAP: { path: string; roles: RoleName[] }[] = [
   { path: "/users", roles: [RoleName.SUPER_ADMIN] },
   { path: "/departments", roles: [RoleName.SUPER_ADMIN] },
-  { path: "/employees", roles: [RoleName.SUPER_ADMIN] },
+  { path: "/employees", roles: [RoleName.SUPER_ADMIN,RoleName.MANAGER] },
   { path: "/clients", roles: [RoleName.SUPER_ADMIN] },
+  { path: "/tasks", roles: [RoleName.SUPER_ADMIN, RoleName.MANAGER] },
+  { path: "/leave", roles: [RoleName.SUPER_ADMIN, RoleName.MANAGER] },
+  { path: "/attendance", roles: [RoleName.SUPER_ADMIN, RoleName.MANAGER] },
 ];
 
 export function getAllowedRolesForPath(pathname: string): RoleName[] | null {

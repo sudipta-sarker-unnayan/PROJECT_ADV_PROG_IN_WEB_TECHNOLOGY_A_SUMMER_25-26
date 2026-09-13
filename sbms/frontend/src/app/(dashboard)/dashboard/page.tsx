@@ -6,6 +6,7 @@ import { useAuth } from "../../../lib/auth/AuthContext";
 import { RoleName } from "../../../lib/types/auth.types";
 import { fetchDashboardStats } from "../../../lib/api/dashboard.api";
 import { DashboardStats } from "../../../lib/types/dashboard.types";
+import ManagerStats from "./components/ManagerStats";
 
 export default function DashboardPage() {
   const { user, logout } = useAuth();
@@ -15,6 +16,7 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
 
   const isSuperAdmin = user?.role === RoleName.SUPER_ADMIN;
+  const isManager = user?.role === RoleName.MANAGER;
   const isLoading = isSuperAdmin && !stats && !error;
   const forbidden = searchParams.get("error") === "forbidden";
   useEffect(() => {
@@ -72,6 +74,8 @@ You don&apos;t have permission to access that page.        </div>
           ) : null}
         </div>
       )}
+
+      {isManager && <ManagerStats />}
 
       <button onClick={logout} className="btn btn-outline btn-error mt-4">
         Logout
