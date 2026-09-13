@@ -6,6 +6,7 @@ import {
   IsString,
 } from 'class-validator';
 import { AttendenceStatus } from '../entities/attendence.entity';
+import { Transform } from 'class-transformer';
 
 export class CreateAttendenceDto {
   @IsDateString()
@@ -17,6 +18,7 @@ export class CreateAttendenceDto {
 
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => (value === '' ? undefined : value))
   checkOut: string;
 
   @IsOptional()

@@ -45,7 +45,7 @@ export class EmployeesController {
   }
 
   @Get()
-  @Roles(RoleName.SUPER_ADMIN)
+  @Roles(RoleName.SUPER_ADMIN,RoleName.MANAGER)
   findAll(@Query() query: PaginationQueryDto) {
     return this.employeesService.findAll(query);
   }
