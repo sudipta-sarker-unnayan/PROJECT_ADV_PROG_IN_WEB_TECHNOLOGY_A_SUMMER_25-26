@@ -15,8 +15,11 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Dashboard", href: "/dashboard" },
   { label: "Users", href: "/users", roles: [RoleName.SUPER_ADMIN] },
   { label: "Departments", href: "/departments", roles: [RoleName.SUPER_ADMIN] },
-  { label: "Employees", href: "/employees", roles: [RoleName.SUPER_ADMIN] },
+  { label: "Employees", href: "/employees", roles: [RoleName.SUPER_ADMIN,RoleName.MANAGER] },
   { label: "Clients", href: "/clients", roles: [RoleName.SUPER_ADMIN] },
+  { label: "Tasks", href: "/tasks", roles: [RoleName.SUPER_ADMIN, RoleName.MANAGER] },
+  { label: "Leave Requests", href: "/leave", roles: [RoleName.SUPER_ADMIN, RoleName.MANAGER] },
+  { label: "Attendance", href: "/attendance", roles: [RoleName.SUPER_ADMIN, RoleName.MANAGER] },
   { label: "Change Password", href: "/change-password" },
 ];
 
